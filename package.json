@@ -1,0 +1,9 @@
+{
+  "name": "presensi-sdn-reksosari01",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Aplikasi Presensi Digital SD Negeri Reksosari 01",
+  "dependencies": {
+    "@netlify/blobs": "^8.2.0"
+  }
+}

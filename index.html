@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sistem Manajemen Sekolah — SD Negeri Reksosari 01</title>
+</head>
+<body>
+<style>
+  :root{
+    --navy:#122A4D;
+    --navy-2:#1F3864;
+    --blue:#2E5395;
+    --gold:#B8860B;
+    --gold-light:#F4E4BC;
+    --bg:#EEF1F6;
+    --panel:#FFFFFF;
+    --line:#DCE2EC;
+    --ink:#1B2430;
+    --muted:#6B7686;
+    --green:#1E7B45;
+    --green-bg:#E7F5EC;
+    --amber:#B4720A;
+    --amber-bg:#FCF0DC;
+    --red:#B3261E;
+    --red-bg:#FBEAE9;
+    --radius:10px;
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body,#app{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  #app{min-height:600px;}
+  h1,h2,h3{font-family:'Georgia',serif;color:var(--navy-2);margin:0 0 4px;}
+  .muted{color:var(--muted);font-size:13px;}
+  .hidden{display:none !important;}
+
+  /* ---------- Login ---------- */
+  .login-wrap{min-height:640px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(160deg,var(--navy) 0%,var(--navy-2) 45%,var(--blue) 100%);padding:24px;}
+  .login-card{background:var(--panel);width:100%;max-width:380px;border-radius:14px;
+    padding:34px 30px;box-shadow:0 20px 50px rgba(0,0,0,.35);border-top:5px solid var(--gold);}
+  .login-badge{width:64px;height:64px;border-radius:50%;background:#fff;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:22px;
+    font-weight:bold;margin:0 auto 14px;box-shadow:0 2px 8px rgba(0,0,0,.18);overflow:hidden;padding:4px;}
+  .login-badge img{width:100%;height:100%;object-fit:contain;}
+  .login-card h1{text-align:center;font-size:19px;margin-bottom:2px;}
+  .login-sub{text-align:center;color:var(--muted);font-size:12.5px;margin-bottom:22px;letter-spacing:.3px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--navy-2);margin-bottom:5px;}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);
+    border-radius:8px;font-size:14px;background:#fbfcfe;transition:.15s;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue);background:#fff;}
+  .btn{cursor:pointer;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;
+    transition:.15s;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:var(--navy-2);color:#fff;width:100%;justify-content:center;padding:12px;}
+  .btn-primary:hover{background:var(--blue);}
+  .btn-gold{background:var(--gold);color:#fff;}
+  .btn-gold:hover{background:#a3760a;}
+  .btn-outline{background:#fff;border:1.5px solid var(--line);color:var(--navy-2);}
+  .btn-outline:hover{border-color:var(--blue);}
+  .btn-danger{background:var(--red-bg);color:var(--red);}
+  .btn-danger:hover{background:#f6d6d4;}
+  .btn-sm{padding:6px 10px;font-size:12.5px;}
+  .err-msg{background:var(--red-bg);color:var(--red);padding:9px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;}
+  .login-hint{margin-top:16px;text-align:center;font-size:11.5px;color:var(--muted);}
+
+  /* ---------- Shell ---------- */
+  .shell{display:flex;min-height:640px;}
+  .side{width:220px;background:var(--navy);color:#fff;flex-shrink:0;padding:20px 0;}
+  .side-brand{padding:0 20px 18px;border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:12px;}
+  .side-brand .name{font-family:Georgia,serif;font-weight:bold;font-size:15px;line-height:1.3;}
+  .side-brand .role{font-size:11px;color:var(--gold-light);margin-top:4px;text-transform:uppercase;letter-spacing:.6px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:13.5px;cursor:pointer;
+    color:#cfd7e6;border-left:3px solid transparent;}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+  .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--gold);font-weight:600;}
+  .nav-icon{width:18px;text-align:center;}
+  .side-logout{margin-top:20px;padding:11px 20px;border-top:1px solid rgba(255,255,255,.12);cursor:pointer;
+    color:#e6b8b8;font-size:13px;}
+  .side-logout:hover{color:#ffb4b0;}
+  .main{flex:1;padding:26px 30px;overflow-x:auto;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+  .topbar .desc{color:var(--muted);font-size:13px;margin-top:2px;}
+
+  /* ---------- Cards / table ---------- */
+  .card{background:var(--panel);border-radius:var(--radius);padding:20px;box-shadow:0 1px 3px rgba(20,30,60,.08);
+    border:1px solid var(--line);margin-bottom:20px;}
+  .card-title{font-size:14px;font-weight:700;color:var(--navy-2);margin-bottom:14px;display:flex;
+    justify-content:space-between;align-items:center;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{background:var(--navy-2);color:#fff;text-align:left;padding:9px 10px;font-size:12px;letter-spacing:.2px;}
+  th:first-child{border-radius:6px 0 0 0;} th:last-child{border-radius:0 6px 0 0;}
+  td{padding:8px 10px;border-bottom:1px solid var(--line);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#f7f9fc;}
+  .row-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:20px;}
+  .stat-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:center;}
+  .stat-box .num{font-family:Georgia,serif;font-size:26px;font-weight:bold;color:var(--navy-2);}
+  .stat-box .lbl{font-size:12px;color:var(--muted);margin-top:2px;}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
+  .pill-h{background:var(--green-bg);color:var(--green);}
+  .pill-i{background:var(--amber-bg);color:var(--amber);}
+  .pill-s{background:#E4ECFB;color:#2E5395;}
+  .pill-a{background:var(--red-bg);color:var(--red);}
+  .badge-ok{background:var(--green-bg);color:var(--green);}
+  .badge-warn{background:var(--amber-bg);color:var(--amber);}
+  .badge-low{background:var(--red-bg);color:var(--red);}
+  .badge{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+
+  .att-row{display:flex;align-items:center;justify-content:space-between;padding:9px 4px;border-bottom:1px solid var(--line);}
+  .att-row:last-child{border-bottom:none;}
+  .att-name{font-size:13.5px;} .att-nisn{color:var(--muted);font-size:11.5px;}
+  .seg{display:flex;gap:4px;}
+  .seg button{border:1.5px solid var(--line);background:#fff;padding:5px 10px;border-radius:6px;font-size:12px;
+    font-weight:700;cursor:pointer;color:var(--muted);}
+  .seg button.sel-H.on{background:var(--green);border-color:var(--green);color:#fff;}
+  .seg button.sel-I.on{background:var(--amber);border-color:var(--amber);color:#fff;}
+  .seg button.sel-S.on{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .seg button.sel-A.on{background:var(--red);border-color:var(--red);color:#fff;}
+
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--navy-2);color:#fff;padding:12px 18px;
+    border-radius:8px;font-size:13.5px;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:999;}
+
+  .empty{text-align:center;padding:34px 10px;color:var(--muted);}
+  .empty .big{font-size:30px;margin-bottom:6px;}
+
+  @media(max-width:820px){
+    .shell{flex-direction:column;}
+    .side{width:100%;display:flex;align-items:center;padding:10px 14px;overflow-x:auto;}
+    .side-brand{display:none;}
+    .nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:8px 12px;}
+    .nav-item.active{border-bottom-color:var(--gold);}
+    .side-logout{margin-top:0;border-top:none;padding:8px 12px;}
+    .main{padding:18px 14px;}
+  }
+
+  /* print styles removed — PDF is now generated directly via jsPDF, not window.print() */
+</style>
+
+<div id="app"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function(){
+  const SCHOOL = "SD Negeri Reksosari 01";
+  const KELAS_LIST = ["1","2","3","4","5","6"];
+  const BULAN_NAMA = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const HARI_NAMA = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const STATUS_LABEL = {H:"Hadir", I:"Izin", S:"Sakit", A:"Alpha"};
+  const JK_LIST = [{v:"L",l:"Laki-laki"},{v:"P",l:"Perempuan"}];
+  const AGAMA_LIST = ["Islam","Kristen Protestan","Katolik","Hindu","Buddha","Konghucu"];
+  // kelompok usia untuk rekap: batas atas tiap kelompok (kelompok terakhir = 13 tahun ke atas)
+  const USIA_GROUPS = [
+    {key:"5-", label:"≤ 5 th", test:(u)=> u<=5},
+    {key:"6",  label:"6 th",  test:(u)=> u===6},
+    {key:"7",  label:"7 th",  test:(u)=> u===7},
+    {key:"8",  label:"8 th",  test:(u)=> u===8},
+    {key:"9",  label:"9 th",  test:(u)=> u===9},
+    {key:"10", label:"10 th", test:(u)=> u===10},
+    {key:"11", label:"11 th", test:(u)=> u===11},
+    {key:"12", label:"12 th", test:(u)=> u===12},
+    {key:"13+",label:"≥ 13 th", test:(u)=> u>=13},
+  ];
+
+  let state = { user:null, view:null };
+  let pendingImportRows = [];
+
+  // ---------- storage helpers ----------
+  // Works two ways:
+  // 1) Inside Claude artifacts: uses window.storage (built into that environment)
+  // 2) Deployed standalone (e.g. Netlify): uses /api/data, a serverless function
+  //    backed by Netlify Blobs (see netlify/functions/data.mjs)
+  const hasNativeStorage = () => typeof window.storage !== "undefined" && window.storage !== null;
+
+  async function getData(key, fallback, shared){
+    if(shared===undefined) shared=true;
+    try{
+      if(hasNativeStorage()){
+        const r = await window.storage.get(key, shared);
+        return r && r.value ? JSON.parse(r.value) : fallback;
+      } else {
+        const res = await fetch(`/api/data?key=${encodeURIComponent(key)}`);
+        if(!res.ok) return fallback;
+        const data = await res.json();
+        return data && data.value ? JSON.parse(data.value) : fallback;
+      }
+    }catch(e){ console.error("getData error", e); return fallback; }
+  }
+  async function setData(key, obj, shared){
+    if(shared===undefined) shared=true;
+    try{
+      const json = JSON.stringify(obj);
+      if(hasNativeStorage()){
+        await window.storage.set(key, json, shared);
+      } else {
+        const res = await fetch("/api/data", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({key, value: json})
+        });
+        if(!res.ok) return false;
+      }
+      return true;
+    }catch(e){ console.error("setData error", e); return false; }
+  }
+
+  function uid(prefix){ return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+  function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function thisMonthStr(){ const d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1); }
+  function fmtDateID(iso){
+    const [y,m,d]=iso.split("-"); return `${d} ${BULAN_NAMA[parseInt(m,10)-1]} ${y}`;
+  }
+  function daysInMonth(ym){ const [y,m]=ym.split("-").map(Number); return new Date(y,m,0).getDate(); }
+
+  // ---- kalender hari efektif (dapat diatur admin per bulan) ----
+  // default: Senin s.d. Sabtu efektif, Minggu libur
+  function defaultEfektifMap(ym){
+    const [y,m]=ym.split("-").map(Number);
+    const n = daysInMonth(ym);
+    const map = {};
+    for(let d=1; d<=n; d++){
+      const day = new Date(y, m-1, d).getDay(); // 0=Min
+      map[d] = day!==0;
+    }
+    return map;
+  }
+  async function getEfektifMap(ym){
+    const saved = await getData(`hari_efektif:${ym}`, null, true);
+    const def = defaultEfektifMap(ym);
+    if(!saved) return def;
+    // gabungkan supaya tanggal baru (mis. ganti bulan berbeda panjang) tetap punya nilai default
+    return Object.assign({}, def, saved);
+  }
+  // hari efektif = jumlah hari berstatus efektif (sesuai pengaturan admin) dari tanggal 1 s.d. upToDay
+  async function effectiveDaysUpTo(ym, upToDay){
+    const map = await getEfektifMap(ym);
+    let count=0;
+    for(let d=1; d<=upToDay; d++){ if(map[d]) count++; }
+    return count;
+  }
+
+  // ---- usia murid ----
+  function calcAge(tglLahirISO, refISO){
+    if(!tglLahirISO) return null;
+    const b = new Date(tglLahirISO);
+    if(isNaN(b.getTime())) return null;
+    const r = new Date(refISO);
+    let age = r.getFullYear() - b.getFullYear();
+    const m = r.getMonth() - b.getMonth();
+    if(m<0 || (m===0 && r.getDate()<b.getDate())) age--;
+    return age;
+  }
+  function usiaGroupOf(u){
+    if(u===null || u===undefined) return null;
+    return USIA_GROUPS.find(g=>g.test(u)) || null;
+  }
+
+  function toast(msg){
+    const t=document.createElement("div"); t.className="toast"; t.textContent=msg;
+    document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+  }
+
+  function esc(s){ return (s||"").toString().replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // Custom confirm modal (window.confirm() dialogs are blocked in this environment)
+  function showConfirm(message, onYes, opts){
+    opts = opts || {};
+    const yesLabel = opts.yesLabel || "Hapus";
+    const yesClass = opts.yesClass || "btn-danger";
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(10,20,40,.45);z-index:1000;display:flex;align-items:center;justify-content:center;";
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:22px 24px;max-width:340px;width:88%;box-shadow:0 20px 50px rgba(0,0,0,.3);">
+        <div style="font-size:14.5px;color:#1B2430;margin-bottom:18px;">${esc(message)}</div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button class="btn btn-outline btn-sm" id="confirm-no-btn">Batal</button>
+          <button class="btn ${yesClass} btn-sm" id="confirm-yes-btn">${esc(yesLabel)}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.remove(); });
+    overlay.querySelector("#confirm-no-btn").onclick = ()=> overlay.remove();
+    overlay.querySelector("#confirm-yes-btn").onclick = ()=>{ overlay.remove(); onYes(); };
+  }
+
+  function penugasanOptions(selected){
+    const opts = ["Kepala Sekolah",...KELAS_LIST.map(k=>"Guru Kelas "+k),"Guru Mapel / Lainnya"];
+    return opts.map(o=>`<option value="${o}" ${o===selected?"selected":""}>${o}</option>`).join("");
+  }
+  function kelasFromPenugasan(p){
+    const m = /^Guru Kelas (\d+)$/.exec(p||""); return m ? m[1] : null;
+  }
+  function isMapelPenugasan(p){ return p === "Guru Mapel / Lainnya"; }
+
+  const root = document.getElementById("app");
+
+  // ================= LOGIN =================
+  async function renderLogin(err){
+    root.innerHTML = `
+      <div class="login-wrap">
+        <div class="login-card">
+          <div class="login-badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHwAAAB+CAYAAADm1nW1AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGYktHRAD/AP8A/6C9p5MAAAAHdElNRQfqBw4ALiAZnRCDAABtzUlEQVR42uy9d5ydx3Xf/Z152u337t3ed9E7SIAVbGAVqd6LJVmSu/06cYtLnNiJ4ry2YzmOW2zLcmxZvVCNIsUi9k6QBIje+/Z2e3nazPvHc3cBsEoOLfp1Mh8uAO7ufcr8Zs7MOed3fgP/t/3f9n/bv94m3ugH+FG2T//xJzBNkyAIqNfr/PiHPkb7yje/0Y/1I23yjX6AH1WbeOJupJ1BWxlb2LmkNGw++6e//kY/1o+8GW/0A/yo2sr+OWR4FisoXElz8sbi7OPPr7viQ3zpm4+/0Y/2I23/R8zwhz77K7S1L+fhuUdEWrrvzZu1Twxlt+arJ17gW3/+0Tf68X6k7f8IwCenTuBXj3FL/tYN+WziXX3dnZdYjvtWk2lWbP1/OHTv37zRj/gja//qN21f/v03o6RDMcg7A7FTfzE8kPtp03aYnJjbNVM236N142StvsBF1/80l9/0i2/04/6zt3/VM/zzf3groZBs7fkWXcaJH+/sSH7YNAXKbdKRT12cc9z/3NDJTDLVzd6HPsuz9/7RG/3I/+ztX+WmbWr351jX72KaDh+O3cEDs9ve09OZ+FRXR75tthgyX/DoyCcwZLDe90qJapB9KmGG7sWf+Aw3DZb4wh1Pv9Gv8M/W/lWZdK013/gfH8SOt1FeOEnB63R64lMf7+m0Ppnv7OhGBzy0S3BmTvO+bS5xU1Iu18P5QuNLJdf8XcefP1WPjVCfP8OWt/40l2//2Tf6lV739q9iho8dvJ+LRxqcOvIEtcIMaWOKatNa1ZNp/t5Ab/bXOzvb24RQzM27fO9MH8cZZbU5TlsqxLEtaVvmZiP0rm6oRGEqzJ7otqpBpTjLBg7w2//lN/j8N554o1/xdWv/vwVcF04Szt/L7/3u73Lo+TvR3gLvfeeXeG7nmhEp7Z/u67D+aGCg7U2ZtqQlUDSrDZ46avBM+nrU0BaaZw6ysq2EZUukaRK3dZ8pg7ekVGW1ErGFhsxM9vVkQrfh8YmffB9XrZbc+c0v8MlP/f0b/er/W+3/NyZda803/+YXWL/lFo7t+z6N4gQ6aDCUPs2uqTXpdMzdlEnId7TlnLfm87k16aQjtNAEYYBbqnNkrMkXzm5k/vIPYcZzhM/eywes73HpcBNpKgKtwQ8Jmh61hl+o+TzghfEvB0b6kdz47fMLPddjZYbI54fY8dRD/NZv/w6i501vdLf80O1fLOCVgw+RWrOdOz/zywTeHIFbhsAnFyvy/OSo1R2f70w65upE3L42mTauzWZjF2cz2bZ40kYJCP0Q7TapFwqcnvK4/fQoZ1Z9GDk0QoiGco3Uzm/zrq4dbOysIBEEKkQpDxUY+L6H64dN1xe73UDc60rnHpUaPmAf/EzJ79uOYWcxnS7e/Yt/y+6HP81F1//cG91lP1D7FwO41pqv/tlP0D9yMVNnnwK/gaEavOvXPP7813WiLWt2J+KJ1cmY3OQ45iWpTGx9MpsYSqSTqXjMxpQGQahRoUL7Ls1KidLcHKdnNHecXc6Z5e/EWLEejQINCIkuzBPffRdvbt/FpX1FpFaEvo8ONKEKCRWEYUjoeXiBLPja2OcK46FAxB8ORXzfntR/m7t09sMauwMR7+Cad/4qJw8+zOW3/sob3Z2v2N5wwI8+9kUefPDvyLUNQ3Oa9thpDkwNJtszxkjCNtbHU4nLEinzonTaGc1k2noTyWTcjllYtkQITRBqwsBD+4rAD2hUStTmp1hYaLBvOsujpZXMr3ozcmgFoJZeWQFCCChXMPc/xGViB9cPFcnHXHyvgecFhEGIViFaKbTSBKEiUAItRCVQxjFPO89qzUMKZ1fZ6D+VqT3jEh/CSfZz+ht/y9b/+Fdsu+kX3uguvqC9oYB/5c8/jOGk8QtHOVHoskYzC+ty6dibErnEjfnO7Ma2tq7OZD5nxhMOppSgNaH2CUMfHYboQBF6Lo1alVpxgfrcAsVSjVOFODvm+zmYuRy5+nJEWxdaB6A1AoFAA9FE10IgfY/wxHF6Jh/mmo6TbOxpkrLq+A0Pr+nRDJqoMEAEEo1CSokhTbQ0UFoEgRaTrrKfcwPz+4EvHm7KdccT/qOea/fxkd/8Jrf/zb/hfT//l2801sAbBLh+6CG+/szvo4TDXfLHxG3B565oz8Z+pqsvc2vnQFdPtq2bWCKDsC2QEhTowEcFDXzfw6tVaZYKNEplKsUF6qUmc1XN8WKSQ/V+TqY24A9vxe4aIDQN0CGGBoWBFhqBjl5cCNCg0CA1ulyFkwfpK+7k0uwYG3sbtCdctN/Erdep1+oEvo8UFoZpIS2JMA1MKTGExNPohqfHG654rO6q24vN1EOdznjBtwcIGgXWXvlettz4xoZvf+SAP/f9v+DAU1/FsRP4rpVuaxO/2D2U/6XhoZ7uVL4NLBukhWE4GMIgDEMalTKNwhzl+TkqhVlqlTrlqqZUF0w205ypd3Pa7KPUtg45sBoz3wGGidJqyYCHQiA1oBUIiWi9vBIaoQy0aH1fg6qU0ePHyC7sY5U9xobOOivaG2QtD+U2aTbqeH6ADhVCSAzTwDBNDMtEGgZaQd31m6Wa/2S9of+6HLTdFdNzjXt/+yF+4s7/l2vf+h/+zwH8q3/6IbzaAq5LprvT+G9r1w7/dPfQgGHYBkJIhGEQ+h61Ypni9CyV+XlKC2WKVZ+FRpzJRoJZP8uU6KMc78fLDSI6BxBtHRi2A0DYejHdmslKaNAatEAIkNpAoUBqhAKtTbQMERigdcsKAJ6Lmp9Bzp6ls3aC5fYEq9trrOwMaE8EoD3cZgO/2SAIBYY0ME2JYcWQloHWIZWqX59bqH+9UNW/Z7qzxz/wn3dy/xd+g5s/+ql//YA/e/f/4MyJA3z34BXiXcu++Ntr1w9/snfZsGEKibZsQi9kfuw0MyfPsDBbZ7JqMFbPMOF3MmUNUk2O4Of6kflORCqNjMcRUgICrUULrBChW5BrCy00SoDUAqEhlAolNFZogNCEUiGUgdQQygChjWiQoKPeEQJDC2g2CArz6LnT5GtnWObMsq6jytqekO6ki9QNmg0P3/dBKEzDxDBimKZBs+EyNr3w+FRR/xx+aX957Bi/+OmFf/2A3/F3P01x+hgI+9I1y7PfWb1hZa9hG2BIqrNVxg8dZGKiyL65DAcb/UxlNuJ3r8LI90Emh7RskAKFRGsw0IQCpNbQ+rfQEUCeBENrLC3whY8UoHGQIRCWW69uIqSBNgy0BK0j066RCEXLfdOAAqERGAhtoIMmQaWAOTtBonSCUTHGZb1VNo8o2pMhgVujWQ8IUUgLbJHA91xOnp69d3JOfNQy9Wy2fz1v+fh//9cHeBg8wBf+6K/o6hulUjrNpfGvs9d783/funnkV7OdeZCS2clZTr6wlwPTaZ6pr2ei60oYXIPRlkWbNkpLtA6ivkcgtDhnqoVEEEY7cN8DQ6Kkg5ZgzI9Tfu5+VHkWJR1SW7cT6x2heO+XUAsThKaNObKe3Porqe17hOTG69A6wKtVcLqG0Hby3GzXYWRFhEBqhRISLUB4PmGxgJw+QW/9GFd2F7lmbUBvqk6zVMPzPExDYtom8ws1feR44VfScv7P6mKQ0KtBLEG6Y5Sje+/mbT/+J4ysv+2fFY9/tlh6cPgAowNnOb73FMKd4J1rvsiD+3sz443hTcODbb8xONjbIQyDemGeQ8/t5ZETWe43b6W+5b2Yo6vRiSRCSNAKoRVR6j4CWkuFFAJ0iHSrmFKgGjXm7v4HLGkguvowtAHFaebv+xyprn5EaZ7mqf2kVmyk/Pi3sNq7SG+8CrtzEFkvsfDg7eT6+pi+/3bcqTFSy9ejzh6muedRqJWws10o015aHgDQAqTASKYwuwaota/iYCXP8wcqmF6dlQMxbBP8wEMKSTzhCK/h5ws164gw7F7PbWarDZ+HTq1qbuyY0ydPHuWWS9L8j7/6n/zFX3/lnwUX85/jonf+7S/Q7F+LpQNOl7JmP+aWu/a/6d3rV1hXZ1Px0e7uvh5tOYTa58zxMzxzMsUTiTdjXv52iNuEWqG1WAqTCKKZJRAYhHh+gHfwaZon9hAUJ4kNrKXtkhtRs2M0Ygnyay8hEBojFgfbIbF8I6I6z+zup5F+gBYGGoGwYlhdgzQOPYf06xSeuRvh+fTd9gnc8gKTd36aeFsn3q6HaHNrxLbeROh56GYFGcugDTOyLhgogHgMlq9loWuEzx7ZydHZHXzkshQJu4mvwTZN+ntTl2Ta7O8aMoYfxht1150cLO/asVCwb59ZaD4+mE40Th+f4IHP/xo3fvT1N/mv+wz/4qc+QN3TnHj4D/FEYngwPfk7gwOpP1gx2vWmoYHuoXx3Z9pJJ4QwNV6pxu6dE9xRuRRx+bsQyTSh8Jdg1oASElMLpFdFndlL+eBO4vEYs/d8BkcH5FZtYf7Ze3AGViF9l3BujPT6K1GGiQ5cGnsexj91kOqpA6TWXIoztJry84+iqzPUSwXiXf00zx6mduAp1MIsXTd9CHPtZbjjR6nveZi+mz+KzHQSCI9ktpP5ez9P4alvE06eJN41gEpmgShypyPXAGlJdPcQpxdsZo+dZG1fSExqtGEQS6REri3u5NvSTntnLtXd197T3Z3bmso574xJb3W94h8Jxr89Uw26ed/Na7j9+/tfV3xeV4rTd/7mx5Cm4KbkP6Ks9htHu+TX16/q+5Xlywe6Uvk2hGMBCr9Woj5TYG58nH3FHN6y7YhMDq1DRKvXBAKJxELSnNjP7Ff/hPn7voxoljAzOTJD6wmEhd23HEMYCNclMbgCv7yAXy9HmxPTwbSTpDoHEYksym+iVLSTb9/2Ngbe+28we0bQpXnMXAdmeyfuwgxh4BHrXoE1vIHxB79KcmAZbVtuofTMvfin99N76ZvR02eoPHsPRitqZ6ggWnQ0+FKDVFirL2JH7EoePhZHK8B3Cb0aYSPAD6J9gDQt4vkcy9atTl9y1cYPL187+PUwseGt77/uH/ED+Oaffex1Bfx1m+Hf+J8fJQg0zvYvieMHHv7ASF/qr5Yt71ubyiTAEGgM6pUKMydOcfzIaQ4cnGX/Wc1zzQ0E628ijFnRnNYR0NKto0szWIZFuDBN8clv0HHVW8lt2U6oQkxpsvDM96gd3YWqVshdfC1WZx+lPY8TG1yF0d6L1CH1/Y9j9A3jDK5j4dlHyAwMUzu+G29+hurEKUSzgXtmP+nRdcQHVlI4tpdkzwAL+56i89JrYWaS4rEDJHqHmXn4y7RvvQHnijfTOPY8QRiSHV1H9em7qO+4D/wmVr4XpI1EExoGVrKd2aOnkc0qZ2ZCpgshbt1FuQ0Cr4ZpmVhOHClN4uk07T3tHdqvb3/4mfzJfOrOQ66+nI+/7zK+dMdz/3IA/8J/ey9+oPnSu77Mxu/d+OPLeuJ/NjDS22M5DlKYhMpn7vRJTh86xd5TmvvHR3jU38L+1HXUh6/Abu9ACVp+tETNnqRw1+cpPX039dkT5DZeiZ6ZpH5yPwuHd+JVm6RXrqd6cAe5oVFkWyfVo7tID6+lcnwvMp0nNrgGCfiVCmTaSa6+HGIxrLa+aDDEc2hLYKQ7wLJwRjYjO3ooHdiF3dVB5dkHcWwDlI9XmsO24pRPHabtxvdj+B4Lj91Jdv1lqEqZ8mNfJ9O/nLldDxPLd2J0DqGRkT9u2RTIsKvYzW5vFbvKw+ycTnFsooauFXHcAkKYxDMJDMNCOibZtlRauo1tYzPdu4V76uQ7/+23ufmyNH//pfv+t7H639603fFXP0+hUuPG9m9jfuWm9w/1Jf+4d6ijwzQNDK1wmzUmTp1i6mydh2eG2B2/Ar35KoyubmzLIRQCnxAtJEYYgJDMPXM3qrZA1y3vxy0sgFKkN2zj7Df/jM6r3k76ihvQtkNyYDVus077zR9i8t4vszA+Ruaqd2K096E0CCHJXv1WlDBQUpLZ9i609OhYNkidFGgz8gC0QgsBgUvv+38BK96GIZOUXngAXXfJXnkLQaWMnUoTc2KU9jyKNDWp1VuoHTuAb5jEL7qGROCjfR8wkHjIwEcZMezBIcKhUYQQyFBRDkJemJvm6KkdXLqwm+2VE3jNEr1r1mHLBJbjMLJuxWCtEXzq2OnwQ1/8g+1HGnWF1jrK8L1RM3zXXZ/CjV2BN/NZTtZW3zTS6/zV0FBXr2GbmAgazQZnjxzl5FnFHXMbOTj4PqzNN0K+HS2j9Vy01mtO7abwzN0kuvtpHN6DJiC97R34k6cpPPkdMsNr8ApzWHaMsFlj7qmHSPUN4cdTJFdfQnzN5VgDy7H7VyCy7WhCFBZaCkRrXCttkAum2WLvZjrswcMCrQkWO1HakOlA2EnM7kHiqy8jufEK7MF1SMukdmQXtUPPUTm2i/atNyGEwErnqZ05TmNums4bP4jRswwhQ5ovPEj5iXtx+gaQ8QxCmUAQBXUMiZHJI3pXc6KeY+rkNB3eODHZJN3ZgVYa25DEYnZvtVjpmJxz7k0k4t6BHXfyjfv2vjGAP//t3+f73/l9DO8oyO5Ngx3W3w4Pd66wHAshBUEz4Oyx4xw96/PdmS1MbvwAzsoNhIaJ0CGCECUkBD71Z+9h/pFvEOsZIbbyIgw0lV0PkmrvpF4pE54+RLNRom1kLfPPP4hbKZIYXU/6omtJrt5KaFpgO2CagI4CM60gSdQUaANEyHJ/F2+KPcxpVjGvsiCi/QWoVlg1jKKyCDAdhO2gtQGZHKm+EYSZJLXhMtIrr2D8rn/EzKRJ949SeOEh0puvQzo21Se/RenB2/Hmx0ltvhoj1YmSrWidFlHARoMywOzoZT5oY/bUOH3iDPGETSKThUAh4xJTqdWV6sL0RV2PPjuvr+V3fvmD/PXn7/knA/5PMulaP8Q//t7v0b/sckLl9PZlvU8NDmY3GI4NAkIvZOLUSU6OC+6avYyZiz+AM7yMUBto4SPQKCExtEK7NcrPP0TMjJG/+DoK+3aQyXeTHFjL3I576bv1E8yXJqiOn6HzmvfS3reCVPcwYaqdQOhWUIZWrjvqSI0mFGLJgmgE2vCRWjDiHWaEo4zET3KsMkwoBGaoo9CqUC8KPWo0IAkJMZB9a0j2rUIjCEIXp3eE6vOPYZkmifwAsl5j5qGvoeZO0dY/SlnamPl+FIpg8hhWqo0w04URBCjhRfl4DOSqTRz0PR45+zXacmPEkykS6Tgy0HT2ddiD83O//vzJS59R6snnnnnsUbT+GkK8/0c3w9e310BDM7CSHcnGHw4P5t6fyKYwkKACpk6NcXa8wR3z65ne+AFiw8sIiWaPQGIgENUF5h75Fol0Frt/kPKeJ3CP7qE6fQpnzWUkVm6kfug5Cjsfwa036Lz2fRjLN2K096PsWJTt4mViw0KD0BjaRIowSqYApjLIhjNc6X2HVclxVLKdF2rro06XPlpbGIStNfLcVTUSgcbQIRqNRqEx0FISH1iOMAxk3CY1upr5R79J9dCT5JdvpVEpkVi3BWdkM+7hZ5m7/S8IZ46TGBxGxXMoWulaBBKN2d7F2WlNpz9Bb6JGIpVt3S8g4Zi5ernWPVeL3x2Pp939Txznm/f/0/zzHxrwb//VxwlCzdnUZtkfnPzVgb7Ur7TnU4aUkamanZxibKzIPVPrOLnyQ8SWrSaaN+FSDhoVIjWUn7+f0t7H6N5yC9IWVPY/Tc8tH8LpGaF2dBeZTVeTXHkRuUtuwBxZjUKCDlj001+uSS0JpSAhKlxu7eS6xJNsTR1gS2I3W+wXGCo/RyapaIu5MH+CYW8/K9Ue1sl9xEzBgsoTinOGT6LQArRohXa1QAuNqUDbcezB5aRGLqIydYagWSN/0XaKR57HL83Sef2H0JVZZr/7aRJdA6gwwD17jNSKzSjDwlAR40YLEIZEZro5e2KO1ZlZUjGFHbNRSmMaEiHCFdVKZfZDv3TP03ufvYyf++hNfP5bT/7zAv69v/tVPBUjOfs1Eq73/r5u5w87u7JJ05AgDUrzc4yfmuXhiQEO9L0fe+3FaGFGuWghEMLAnzhC8b5/RLtNOlduojl+lMapg2QvfxPNhTncYy9QObwLb2ac5MbrMIZWoeMZlIhib0LLJajFy3yBQGpNKAxsr8LKxtNs9R5io3mQ1ekzxEyfUCnC4hz9/gG2pI6xob1EJdbLLm8TZZ2JImYtg7v4rxffU4vW93QUZXO6B0isuZTY8Ab02BGEkyI+sorZO/8Ow63Q9+afwC1XqJw5Qm7T1WCZoM0W8SJajmQsRl2naY4dZ223T9wWCEOiQog7pvS8YONjdw88ZajZsbOH7uYLX/wmf/QXX/znAfyF7/8Rw+/+JGP3/RoNe+Tq3jbrf/Z2Z3sNSyIMC7dSYuLUNM+MtfNU6p0YW64GaS32WQS4lOiFGYqPf5va7ofxy/PEMznqJ3fjFYvkL72OyqnDpPpHyL/pY4hcB0qFCK1bEbiXmvAXuykCTYhEAnNGN8dZTaMKVuEUYWkBKxbtzC0buvvbqLat4tv1d3Jn5Uamdc+S5XjpQOJl77/YtJAIaSBUSGXuNMlknuLOB9HNKpblUDj0LPWpE2Qvuw3LsSg+fjd2VxcikTxv7wFGpo3xKZ+ucJqRLo0pTUKi6GDCJuPW6kMLVfOeZLq/fmT/Lr714JHXH/AX7vof3P+Zf8fC/rtRVu+a9pT+m67e9HrHthCGIPRcZk6fZfdkhvvVdsxL34qImUgdrXgQTQetFUYuj53twjtzgGy2E9raqRcLNE8ewMj103nzR4ivu4Iwnot281oghHhJx7+4LQKvhWilSy0kIa5Mc9Jaix2Dy7tOYxEQKEWj7jNViXF77f082LyemkgiYSlU+lJEX+oDa63P3bv1byUt0gNrCL0qlbMn6LrhvTTOHsXK99J+60eIJZNMfPd/IZRPcu0ViFjigoGkTI1OdTF+eIyN/T65ZIjSijAEC4klw2XVekWMl1Y9nI676hPv2MqX797z+gH+0Of+Awef+FvywxvQVmqwLen+dW9n+tpEzIzYJkowOz7JsWmTuytX4l/ybmQ2hyJimiAEUhqLfEG0Fthd/djJHLP7nyE9spb2696L0TmAPbQGo2+UUJhRtwvRAvBCUF8Z8CgCL9AgWjw1BEJrLsmdZnN8P1Nn54klk7RnLWZnXF5QlzBurYxYLUK1lh7xCtd/7SaEAmlhtneTWXspqlJifvcj9NzyUaS0mb7zf2Hnuul4y09AW1droJx7R6kkIu5QVkm8s+NctMLBFCE6cKOQsi2FEQSbtXd6PObe84JOXMon3n8lX/j2s//7gH//8/+B6X1fxsmOEJDsaUv4f97TkXxbImFjiGg2FaanOTsZ8r3ZTRQ2vQ/R249SLYKglNiei39yL+6ZfUghsBM5lJQ43YMYymPqyXtJLNtIcsuNiLZu1OKsYfHvCzv8tTt+ccXVyNafaaPMO7MPI6YPcqAyzKHktfTlTTKiyEzd5Ji9BY3dcuDkq5oScd6AWLIqF8z+aG+tpQFOAlWrYAiIx+KM3fn3xHsG6H3zT+G3dSOISB2GChDCjD4XsTwwM3nGz5ZpF/OsHUzg+w3CIECGELOlrYLgktnm4H5R3HXczF7Cj795M1+487VBf0XA7/j7f8ttH/sUh3Z8Bzdw+trizT/r7LDeG09ZGCi0NCnPF5iarHHX1BpOr/og1sjKFsM/RAiFGfhUn/wuC0/eSe3kPip7nyCeTuN0jBBKcHpHsVI5jM4BZCqNUi+/Tr+4c8//+9UHgkAJwQrzOJeqR9hRWs3diZ9kh7iak40hOlI+bcEkh8I11GRuqbMvGD6vEc586c/O+3+tMLIdJHpGmHjk2zht7XTc9glUpj3a9M1OUHr0Tso7v4+hQ8yuPhASiSQ0BSLdxdH9E6zr9uhvt/AaHsKvo7QiZlsZFfiXNlX2hXrxmTOhNcr7b13D1+55dfP+soDf/qc/jucbvHDX74DdviLr1P68o818dyJhI4VAS4tqaZ7p6Rr3TyzjwPC7ia/a3HIxFEJLQtMkPLGb6Xs+T+/FV9Lxpk8g6mXmnrobKxZD9C4DwyHWO4pI5dBaI7U6b4/3yp28CPZr/R6AoQNGzLOcrLfziPk25sxloC3Gww6ONEdIxmyqOs4MvQhMFmkXP8w9Fmf9i78W8Ve2Q6J3gOSGbchEJ6EO0Ud2MnXXZ3GrM6TyHRT3PUVq+SZkvC1i8qARjk1DtnNq7ykuWeaQTYXU603CQCMJSJpGR+jVr6h52YO5hW+cqlsreM/2UW7/0l/yyT/+wmsD/tS3/oDvf/UBbrhmmDfd/0WOrth4XZtd++t81rjRSVqYWCCgUa4wN9Pk3olV7O99N7ENV6ClhUChhECIEEPYWKaBPzvJ/MHncDp6yV95G2G1ROHgM2TXbQPbROkQoVXEQnnxjvs1ZtZrm3eBEJqCSnMmXE1DZjH8BkGljHRiVElxMhilKtL4WBF1Sbzy/X7YJoRAAkoIrEQHyrbREvyDTzJ+92fJLttA340foTE3hTszTuriqxGxNAgfdAwtFDKdYLoeZ+zoGS5ZlSHphDTrdZQfIkSAZRudImhuL4mR2bJef1AyqWbUOt5zYx9fueOZl+kR4KHP/xIdPcs4uvdxvPmDBPE17TFj5hMZO/yVbNLos+wYwooizvVajclCyEPjq9nf/w6s9ZejDYNFv1VjYPhV/GP78UOfxMAKSs99n9ILD9O29UaSyQST+55i4IP/HpXItAiCtKpAXn5Wvdh8/zBNtdZlIQSitsDC43fg9K0gufEqwvM2TK0F44L7/SBg66WI36tzSVpkGEToM/2VP8LJtNF16a3MPPt9Ksf20n7ju0muuyoibQrZcvQVsvV8/tF9XKWf5qdvMIipeUrTk/iNOqEf4LsuhWKjPF8zP1NRqT/PVV44Q2Yr/Ss3U5wZ5+af+3mEuAQA4/P/5Qbq5TGmd/8tIrMpLyVvS8vip9pi+ieTSZGVpoU2NCpQ1EpNjs9Z3D29nuPL3oe17hK0EW2NorUOpAip7LifhUe/QeC6pNZcTGrFOuJWgrkn76Jy6gDZrdcRG70YJeVShwp4qTl8UYe/lpkXQrxkzZXaQEsNbhXnhdvpnHkOf/k1kO9GaoVAvSRqJ34IS8PS5vIHG4wGIc3TJwjGTzK//0m069Lzlo8SH93IwiPfxZ86RqKtC+3YCC1b1TAK2ns4XbQ4eWCcFR0WHRmN6/mEboDWGtsQjmWE24ywtj0wuhAiMXnTz/xN5W2X2+x74mHee9NqPvSuyzHedf3osGmZFxmJro/G9cLvJizvFxJxscJ2hJQiyiKFjYDZgs/TU23c39jG/IYPYY8uR8nzAiJCABLTbTD/4FdpW7GJ/EVXU37+EQpP3oFMpWjfeDXk+slc9iZCO4HQ6lW76cXgLQL6ckCc/7MLrIMAqQKs3Xfz8eEjJFJxjqcuxUxno2IUzkXuzr/fiwffK23exFJS7uXf5IJnQRNKg3jPAKEpSAytJHfduzH7R9FuDb3nMWafvhuZbifev5Io2N5KAgmNzPcyEebYuWsGM2zS32ERswQ68AjDEIHGNoJeW/i3yqD6pvdcP7xKm/GYxrA0wsC0DXHn7110Qhqyw5Q6bVoS04zI+UorXE9SaNgcqebYX1/GTM82zFVbMJIOSi8FGZdeSGmNoQKK9/wjtYPPgBnDzOZJ9y6jeOBxOm/5CM7G61BKEooAQ0v0qyB+fiefP4Nfaea9LCgS5PHdXF+/nV+4rZNvPjrLF9U7ESu3IVSTUJ+Lcv0g7aWg63Ox1tcYpLpVvYqICI1CSAzXJTyxi7ln7sQvVchtuZrEphvQqWxUr47VSjpFzyiFIKiUCI7uYaV7gCv6S6zK10nKItptoJs1XN/DdRuEXoAfSFeFuuQqc64qc98yDdEctoUpwWSuanOi0EZZ5KhjMRO0UYwN4navRvavxs6kotIdpS/0PhZB0BplmLRd/z6cwWUIw8TKdEKzhjy1D7RECYEiiqAtrt+vZDJfruNezmy/+PcvmKnNOqmzj/LmG2JI4bJ6wCL+zAtUzBRWexc63Y4IFIhwcbVvbSlePqr2UisilkbLBcC+yI1cegdEZNlCEPUFFh7+JuUDT5FevpHON/0ERlc/gbbQOozy8DISMFi8ilYKUlmsi67mTHEtJ6ZPk5g4TUc4Q4dZI65rWF6JdZ0VuhMLiFrF8UO6tLYeksL4X2YtzP6RoPlvbTtMxGMCNzB4pjoEF92G0dsD8QSWabeiZFFh/AVBBq0vfCklUPE88YtuRiufhbu/SPXAo6SWb8FefjGhUq86o19t9r7mbH65ATB7hktzM3S1O7gNj9Fem8tTp7jz8TG8dJ7kzR8jiLchVbBETni1wffi53j5QfDKTRICEiVM8GsEQYOe2z5KbOUVaNvC1WCqEL20XC6WRtLqaxVV4AiJyrdDRwcN/2JONxucnpsk3P0E16T3kDbqePU6fgh1ZX6rrlP/VjdLM8ab3/L+Jwim85ZUVyQsxUC+SruscbogUT2rkPFUVGIbMa9fw1UCIcPod7VGI4l39ZBZcxnpTVej4+mla7zcBu0l1xbRZmhxUP0gO/cLABECTr3AW7uPMpAXBCqBlIKs6XFgz3GuHGgwV1aEPWsjCRCMpczV+c/04rX9xfd98Vr/WuCHBhhaQSxNZvnFyJ4VhMZirl1i4kWACoE8T7UCaGUNRcQp0JF1MYVAaYVx+AneltvBNQPzmOE8vlI0POsFV7T9rKGaZ6tzxzHed20qcI3MPjt0r7GNoN80DHoSNdLeNMfHNaJ7JcqyYEk54dy6HRFNWw8kBDGarDJOUSZNgBMFMWIpZKYDZdrnCvFfCaClq56Xhrzgbuq832l1sjjnWJ27VvR9Q4UYp55me/cU2WQcu+sy3MoUGaNM2va4Yl0HR05MsWAPIWNxhDRZDM2eu1bEeTn37xb9iUWXbnF5Ey/vzulzP1/8pGzVxoWCiGAZ0SFaP1e0UWXInmRB5aICxxbxQpy3kmpxLgyLVojdj3B98H2u6ptEqzoqFLierFUD+9elN/VY9xW/QTafQ/7Yf/w+ybnnxkLhfNoPha9RSMNgY3eJq4ynCQ8/GxXSiIhCLNBIon9rACnQMsozdQZjXG/fT5c5hxaqVeUpUfitAjz1MpC/xE5Eu17RoibR8nWFjHLrUkSqEIYR0dREa0jo84aLMJAommePYDUqSN9D250kOi/B9yH0G1y2to32pM9IqkZt5/epH98NskVwuAA4HQWEpEAb0VcrnAI6RGlBcD6u523/dKuqVWiNRLVma2umQpT2JVyqUI2WE8mg2s81zuPERJ2w1RcyetmogHJxqLUsS3D2NOuKD3N53wxC+AitCIFmqO+vmn13eomVVE7ezc0f+3PM+77w6+iuLbhafM9UzYMWwSYtBA5wSc80J049ztm5VciuLlDndqSL1B/ZquQwdECff4jV8gVWxi9irDwQxdS1jrhsgES3kiOvsjSIFsNkcWBoAyEFhAGyVkbUSoReBR14KCyMth7MXDuBkEi9OPIV0nUp7XqQjFmlXg0wYr3YmSHMtlU0C6cRNDCkQUIL7LPPoXERK7egpH1eAEggtEFYniEoTGAHIcK20E4SmcgiElm0GW3CDAIUJgqJ5JxZP6cpc45Goc+zbKpVjSo0KB2Z8+XN59iYP0GvsZ1jQRItokkmdCsL2Bo4WgiU65I4/jiXtZ8mYbkRVUtrgiB0/TD+hZR/rL7/5DF+74s1AMxbPvIWvvd5j7d89M8mv/X/Xv2gDvUmYQQE0iJthlyWO8PZUy8gO26MuFwtuQxT+aREmfXxA3SbRaQZMDD/GJlgmmvkA2j3NKZpUHEG2Kc2UtFZDGUsmeWX2/xcYPhas0IFDfSZ/cRn9jBqz9FjV5gaK/HcWY274kqyuU7OX+Oika/RjSqj6jRqdpojY4qNMok04nSM3srpyeP41aOIQDAzOcUlPSZlZ5ZTlXnI9Z5H2oDAUBg6oHrqOO7Rh7m0TzHYn2XKT3As6KHatRF78CJCJwatciPOe6JIeGIxrv5S/8/QggF5ltXxo6Qtj5ius9J7gTbpsV3fzmCjD8t2GI+t4oi/usW3j65nIPAnzrIieJ7+VAVpJgkCH02IG3C4oeNPmE6cbdu3wRf/OvrMJz/5j2zqneYnn/siyowlHOm/y5GmgZQYEtJxODydoN69FmnHWqZMRsDrkHb/LJcF93GFeJLh+BRKhaTcMTZnTtCesTgUrGM87CUU8jWN+RJgCAw0sjBBbPc3uFE+xUfXl7h60KM0U+V5fxCu/CipDVdDIg3IVgiyZW4l6Oo8a0uPcnlXlVplgeUrVtE2eAnSyaK1JNAGzUBTGD/DtvU5pmsBE9lL0OmO6Ala0T+JQMaTJIZWEx9YjVtaYHlskvds9Lmyp0xibj8Tx08QxDshlW+55boVHj3vvcT5cfoLA0Nah4w0D7HNv4et1vPk4g1oNOnRx9jUNkMYz3LYW8O87miZ/9abhgp58FGuje+gr01gmkZE3/I19abxzV8cfvhrb1UP8a7/5zPnBhjAN77yFQ4f2kmIKRzhvtexZBoJQkrilmSmJjljr8HItS+9kAACYTEp+jjjDpBtnqbbmUUE0fp+3L6Sz9fexz5vDQHWUpHgkql7Jd8bgZCgJo/Tc/Ar/OzFJW7abOOoGt97Zo5vV7fgX/4RdPsgKI1u6bYsduMiUKpRJ336YW5ZEdLb5oCM0bHiSgwjhmGlcbKD+OVxsmqSmOmzdzrGdM+16FQ2Mp3nXQsdmV7S7YS96zh0uoI3eYhLR2NcsibDinSVkzv3UjS7kbkuaLleSx9eBPwlm8soBt+QCU6LZUy5afq8w7RZNZTywEqzQ76Fr9bexpjqjcLELcAlBkG9TOfx+7my/STpjBOpSWqFaqKqofnXt0390Qsf+O3v88lPfnLpfhIgu/xWHMvBMqwZpcWUXnQFtMQwFMPpKkZh7hxNVy+uSRolHCadlcT6h0BrfGljmAZHJxRn/D4Qxnlr2Kv7s9HuWkJhmo4DX+UXLi2zcUijmx67jrncU99CeOUH0XY7Iggj7vl5luPcvlqjU21Miz4Wik2yvWvILtsW7Qe0xk53kGwfITRyZIYvpliBs/U2ZCq3tH5fECFrXVdpjR/PIC//II/oa3j2mEvgVVnTq/m5bQ36j34ZMT+Glg6mVtFaLn6AFK4CnyQzibVk+nqp1VzMWJpmI2DvbJyiyiOVTSDVuYEkNKpUpFfMkHYCpGVF7GANXki56eqDgdnB7gf/1wX3WkrxdHT2kc72NLS0ClEErLX1EJKeZIhTW0CHF2aFBAKhoNeYpiOY5PmF9dzhf5TxtmtZkZ0nH87yw1Uka0ToYh68hx9bW2CgSxCEIbWmwX0THYQXvxvsJAqPQGqkbm3ULrhCqwYrlqQ8eBXPTUo8pRhYsw07lgEpkMJECIOB9bdixvPsn5LM9W9BpdIv64Ofb4ilDhCWidz8Du6b7KZYtcDX9OcFH9zUIH7oLqTvRkWRmC+bVDnfl9fCbwkSKUatKUS5wION7dwRvhvVuZxV5nEMmmgZ7X1af0Uxj9IsPeYcliUxZKvkQkEgwqKRzMwaiQybb/jJC+69RMAulSvMFC0/b4YV7egla6QFZJNG5MiHAcI0W/UYi02Rk2WeKa3ncWcbMwyxa3qMKxPPk9clZnUIP0AEKnoJiZo4yer682wYyqDdEDsb49mpOqeTV2Bme1EqiDTXlDjnh563Q1I6ojLLZhnRNcqOkxtJ7dgL7d+jb+NbkUK2ZrGmOHmSh+5/iocLw1hrN0O9ThhLo6Ra0pNZGohL7yBRWiDTOSayl7H/zP3csDVOUApY2ydZvXcfz5/Zj7V8E1K1AlCv+P4aqQwCATHdJCmqfKdyK8/FrqZeT3FQbWZD+hBt9SozpJBagghapQsCUZ0lG2sgDKdV1BCN/pCw7EHFkvIl1mUJ8PmFWfbMdKvr+pUXbcoW80gCx9bEtE89CBCmPOf7tm59wh/gaLiMqpkCFGNhP3dV2zCkWiI3XPCa582aKJ0QmSqpFeVDT9MlS4jQQhgOlm1zfK6G174SS+gomdnycJay2TqqBhFaRyRCt8L8k/dgBCFS9PLNmZCHvnGI1AMVlJCtu2n8+gLz8/00E10Yu58jkIL8tlsRiWyrdEm32LbnDUodBUzQEt05wrEZk1usGE0ZgNug267SOPQU5uiGliKEEYVDXyHlqqXGaLmTz7obaBhJfBEDYG9zLWdEPwFm61micKsSoFSA1ayQiPkY0ljszJZ3Y1Xj6bwbt15qXZcAN0xBLGG0xo5sfT66iWlIDDRCqQvyY1prFJKyTqOljWitW1oIqiKN1lHlBq8S9xZCLQGvGmWyleO0dUq8RgPDsQlNi4IbR/bmWw5dK+jBORdOtFSWlABhGJiNMqI0i9ndg9Ixgkwnc5jMCb91z4gVq+Mp6B9EComQPnp6DFkvQDKH1hItgpckUtQiDRqJTrZRDmKE0gapaDaaJMyAVOUEVEqobLY1mF/FqrWok56I0SSGlPJcvRxQ0FHBo1yK78mIuh362EGDuC0wLGPJiio0WlMPte3Ll+nyJcATyQxdgRICZaHF0u5XLEa1xEsTC0KA0GErCBNEYBOxX6QOlwBZDDS8eE1cXDMWrYkqz7K+swmmotF0MVSINCI5SyFeFN5cvI7wUcLAxEQ3izQmD+AVdxHrnaRxdhd4K4l1jaClWDLlojVwFBqlQ/y5CeAw8ZEuyifugcI6Un2bEak0oV5Ma7K0pzkXQBGRe2pIQqVwGx6ogDUdHkdKM4hsHl4D8MX4vUGkK6fP4/XR+t5SRWtLjCgiyilM7RF3ItnP8z8ThKp2drzmD+e9Vwa8LdcOMWGaJSO+FA8SAilNlDAIREvA7kU58EWfUBOZ7sW4khIgVQS+WAoHLvVVy0yeIxdJAWG1yEiXhTcXUq+GOMkmjmHSkdboWgWZ641UkZdy0NFsNfwm7pkdeMVnMRJTmNkmwUIdayhOMDtHZbqBkxuJ9FdVSKhCDCGwJATFMXSqSqIrhm8uYCVqiPAMlSM7sVJbSQxtIYglUaplvQhbpccSUS+TTQQ4lsF806PR8Kg3PVYNJDncmI/y/Vqj5Ktl28+FhjVmtDnTi4uljrjyWraSJqoVWIqua8iQWCLyikLdYokJUJrm3pOodqPwyoAbBCSFbyphJKIyW4XGxJASXxgE0sZYjJ+3Zr9ubRSkW0UHblRpEgYQhIhEGuJt51GIzjfDtNbGaHaLlvWQfoPuNodiPc5coUAsWUULxbJuE+PEMehfSWRQFVJH4ZawME3x+L2EMzuJd2rwIayExAfakEmbBtPQ1Ixu2sisjuEFUZlyMHEUXS9iWDWMfJnYii4sX9EYW8Awy5iiQeXUMdyFAySX34rsHGkRLiOTK4RALJxleQ9IDGrlEqWKjx2P05uPoaerLIZutIiKJxcLEc9n2ESTIyJbmgpUeQFfCqTngV9DpDoQ8WyUR2ttSBECFFgyxInHkYYiCIJWEEejkc3HZm7T1638yisDPj05Sai0nTHChGiBgdZIQ+KFBr5MIAy5tEOP6EECVEDh8e/intiH5VXQpo1nxshsvZXElmuX6rYXPyMumOGLgSMVWQNpIIXPUF+Wk/sXaM+VqZTKbF6WoX//Ycbca9B2DKkkJgJ//gjlY3eSGChiLEtR2jGOEBKnLUFQ8WgcmCLekcFqE1w2kOFYmMIEDjz5JHNP3UVq5QZ0zsTOJCnsOk1iMI9lQmPBRTRq5C/tpynOUD3yZVLe27H71uIvjtqgSmd5H1uubadWK9Eo1Dg906R/WS+OBVIahEKDpMXsaaldvIQZq5BaEhgSPX2C6fu/Tn7NxZSOvIBXnibWv4b8LR9C2EkMFWnFRiLAClOCE7MRhocI9JKxEIj6yfs/pv/+P7/lJYAvbeNM08Rx7LgB6SUiKUTisJ6JbyajrNj5O1Y0Qhhk1l9B+6qNBJUiuFXyazaRHl2NoXQrkbB4NRENlBY9SguJdhuoqTNoKVCxLDPFgLXL2yl7grmFkPkz03S2J7huwIUTzy8R+9zZk5R2f5XM8DxGh0n1dJHYaAfZq4dxlufxZ2sYWPiBol5YwK0VWJ6N8bYVWZKnHoGwQTzdTVCYo9aoYsRieDM1nIF2clcOYm3MUzg5Qzxmk15do3LwqzTGDkbCAphwajfb+xcY7IkzNzbFQjlkqqRYt6KDhbKHjmWRQDB9Al0voRCEWrU2Ved5KSLajpla05g8SjLmkFq2Dmt0Hf3XvIOgMI6qLmAQstibUScqTCkiwIU4pw0LoHSD79oEgX5lwMMgIPCDpBSkzg/5GqaJG0oCI/aSTdtierR2+jBTx/aQvPxW0le/l+KJ45RP7Is2OEvct/MoQUt/C3RxmsqzDyD9MkayjbMzIY7pcdHW5RyeCJidmqU0M8OtV+bYUHkENX0cs1GieuwOrOQM1YkyzR1TGKUAuzMZ7akChbYE2Sv7SW1oI7GijWq5RMyU6MDF8n3sRBZMiC1LkdvUS+ayQUTGwgs9kIp4NomlTSrPjlM5OY9MTVM9cSd2aQF/7gTL5x/irds6qRWKFMZnOTTmsn7DKDkHjk42INmBDFxKzz+AKkxgtER/z/dwYFHGM9L/iHUvw6tXGL/n86jTB5l57mGMRBYRzxMIcZ6QMCilMCQ4TrSzX+pZLbAs2/ve9z1Wrt34yiY99BtoaBMxUrrlBoDEtEzqykRbTouAt+iOLZpkRTzXRea69yG7hghVQHcyRiAdNOEFrO/zxlHkjAjQzTKd5QPosYOIvvUcb7QzOT7OZZsGKFVHOXjyJLZzkPXbtvIzN+f50/vu4ICXxumdI9bfSTDToHxolkRnmtrRSYRpoYseVsrCL9bQtolhG8wVZhk1NA0vohsIJ4kbNDFjEl0P8H0XOzSo75vEzSYgCLESSbyaTzybwhhKoKaq1HZ9ixVWnZ+/OU3WCTjw7AH2ny7TMTrKtZcOMnHmLMcqWUS2Bz11mP7KIZqNi5CilVB5UbpMozG0RgmNme6g/bIbCRam0GFImGojuWw9Kh7DUKJVe9aigiiwDY0di+F6F/5MGlZw+iTc9oktrwy4IMC04m2IprM0/aXAtB2agYW0YucBd16MWZiEfpPCsw+hamVU6GGaDrGB1TgrthAKs5XHjVgxS1yRFmPAUE1uWmuyd+IRzrSPUurazAtHj9PTU+SG61fw+MOanftPIeJ7uOiKS/jZ621+955dNLq6UELgVerElmVwhtqwvRxqwac+N4VMxmnOVAgDCCo+BTGLJQVBEEbs2nQO1azgzpZQvkVgQiyVQMybOB1tGO02MiYRbRaNQpMUSYxOG3tsP5/YNsqqIYsDz+zl+d0z5AZHuOm6lXjFWXYdbTKduwGhXPpOP8y2zQm+o3wUBuBHgifn1bCpxVkvAxondrOw40FiMSM6WcFwUI06ictuRkgHJXWUYhYCoQIsqbFjNm65ZS1b1l5p7cfaQL2MhI+MzMtpDOHjOEZGCJacOiEEhmXhaRtlWktAX8DnQuIvTGIn0+Qvuhqnd5Cea99KozyL9txoF0qUeDgvzXxu92bEENLlPctniO25C3NoI48Uhjh+fAF/dobt20cYWb+KE0cWmB2bouR6uH1xtC0hCND1gHg+hVIhypYIB4zuONaKNhJre0iv6yK/uYuiKNNwPfxQRb5zIoO0m6TXd5JY20lmVSfmaArZl8SwwXAkSmmsfBLhBYhGCEaAGohRdD0WJuc4cmSCnpWDvGn7KurFGY6fmOWxmS5iI1sx997NO5ZPEU8EKNNpuVW0dqnnASAUiABDGSRHN9J15Y0ksu3owixecQpP+QgEpo6+ZMvKEvjELbBjZku6aNGVE4Rh2Ih3tGEYrxJpk/i4zWosbuulelkhoyiORoKMwq3nh68jYn2AyHYhgPimawgznajuIeLLKxEz80XtfPkMtEanuzh6KOC2DT4fUcf42knJfP92bt9zO+9ojrGs0WDbpcM8S5Ny2efAQokgZoMBqhaFOWXMQgkwNXhND5mKRSZUh2gzEt2ph3XqtRqppIMQBtKJE5oLmEmLQEaC+BKBnU6imx5axKLaMNsAR6LcECthENoWR2ZKrEoYtPX0ccll6ymOH+HYqQLfO5xltv96zDNP897eg1w6avKX99UIV7RFIeYl9/R8ICQITaBcik99D/+F+8GJkx5ZQ27FFsTgWoRh4YtoiV0kNSrfJZu2sezwgsJqrQWBCipO2yDiZfJWLUROI8KAMHRNrAsq8DENC8OQ6PDCwgPRemytBKmVl6CLJ6keeAp37AT1vU+R6B/EUD6KpRVi6XXPbVzASLdzVoxy6Nhutl+Rpy03xjd3jnGw3E7hwXFu3eBz0WbNmpV9VJtN5mcqNKsustQkrAfo2SaNE/NoS0bWZrwcidd7PlJIlNRoXxPWfBrlCnXHwjdMbNuhUStRO6XBMiKTqBThbAPVdHFCCA2F9CCc8/DdMl7RRBd9puIKtayD1Wv6mDp5ip17xvn+XsVEaoTh1HO8ZwNcsiLLkf0nONoYQOS7WmSXl6tAi/hqmoDYwApilkngNmjWipSef5ikr8hddA2LNTqLlErpurTnJLIV5YvCsa18meOUQxEia/OvBPhakDamGQ8F3mJpX+TTGQZ2XEL93NExSwAKGe0yHcnCrsfQlSrO6Fri6Qz1g88hj+/B2XgVqJePpQs0WA7NtW/isYNH6ckeY8OqYda+Jcnuk4LDx/s4Wlpg9skpNq0os3zNAKYlkZk4xDVGaKBtE5mwUYbCMEyCuIEMwUxaUTRMgbQEblozPT9Fe1sG6SSRUmOkJWYyIkYuhX0dHy0CrGSr4sMQWI6JjBuImIlOSWJakTQtThw7y57DCxQDh80b2nnfcsmG5QYp2WDq5DTfPxxSX3YDwklFIVPRIkme34dotI7ECmO9w9DWDV4N7TUI6zWcgeVLnxNLunMG2q3TmQEdBhC2eIAaQqU9r6nmdWjQf/lPAj/1coBrFDa2naxq7YeLNkeFIUEYkk8rrLHSEhPkgvEpAC/ALczSdfF2nA1X4pcWKOx8AkeFkRV4GbD1eUEIY3A9++bfTuyFL7C9vI++kV6uWNPP9VvXoIXJ5GyZfXsOMD1Tprs9g9MM0HkbnQrxvBCrJ4MyooieEShohli9GZQmIlgKgeuGzJaL0d4xkaEZNJADBvZABq2CVqxfIkKQOBhdUe2boUyCUhPZm8bIWFBs0q0EM7PzzFUUN73tcvq6c5g6wK+UmJ84w5GJOZ44YbAz9S5YdhmLyhJahGgtL8gpKBTK9PFPnGThjk+D1Eg7RViewBm9iI7BVectBa34vQpxGrMMdwj8wI9kx1veUBBS8wJjRoj4y04yM5qpXXz1v1yH2/QmHZs6iCxAqEIajQYjnR0kds5TDwIwjCX3rMVDRSQSJNdcxswLT9LVPYK0Y2Q2bCO2ZitKL6YzL8yiL6Y4g2YN028iN9zMU0gmD9/B5bMzLD8zS7otQyqTJp2Pc81l6ygtFBg0TOR0kTDXjrQjOnLo+pCI5oudjOGWK+BrUAoZgg5CTF/hlguEQYiyYojAxQ59wqIbzXBDgCXwGh6x9kQUIFGg3QDhh1iWhQ/Eqh5D/W2kkpJrRwfwvBKTh6aolysUClVOzfg8N9fB0f63EN94PaJSRFkSI5ZH6iCa3Yt0cqJwq1Rgd/WS23QVlaPP4hgGYecovbd9Ai+ZWWJhL56rGDRr9Ooig10WjdkmqMhN1hoUTBjx+KT5cqkyzo+lx9NozalQu2NondVEdUyVQonhjctZmZxjV2Ee2dmzSKoGgqXVPLP+SpxECl2YwjdtrFyOcOoUdA1BPNWiNJ/jny2VXSqfhce+jeNYWMs2cDb9U8xOHiSxewfJ0nFyjs9Qj82qkTzd3Ul623oY8QOOugEyYWBmHYLZOk5vEr/hoos+/qkiYdMHQ6E1mJaNDqHaXKBSdxGxFLiz+IEiOFsmUD6ilWv2xspI1YGFwkjH8eeq6IQBDghX0VcLWJEWeOUCO4+c4tCJImdmmlQ8k3p6BdXui2ms3oQwLMpPfItqpUHX1e8gjOulwMsF+bMWvRppkd16E7FVWyg+ez/1s4conTpMbMNlEXevlRkxEOjiAuvbayStgEKlQks3FKU0QSiOzBnd88Mp79UBl7EOpuSG6f7Kt57VKlgfGjYmmtp8kbBe4c1bcux78iBhvoPQBBlaLTcjjJQL62UKe59CnzmEmeuCsI7X9Ol+xy9iL19PeF4F5Dm7rjETbSRWrCf9zD+y1dpB1coQKAsjZ9Ld3cWygSQ9HWniQqP8Mqo0zS09bZydruEPZDG0ycK+M6Rm2iFrYsQtjM4YZswmPpqJFBQNDSHUnq5TrNdwklm0niSxsh1hGQT4WKHAm2wguyTCkjRnqhhjVZoTC8RX9KACjT1d5uqOOKo8SeBr2nr6uai9l945lzMTNWZ9SUOfQE6dIO3PsH9cYF3041HljQ5bqeCWf7OYLhYGev4MU/d9GeXV6br4Rrpv+iC14ztRTiJKU7eSRUpolBIkpo5x9ZUCt1LFb9ajQgUl8AOFG8rHVrmP+rX8m18W8CUqinn3C2y+bF6HMtEQQr/DNoRjyCgr43kua1f3UC3VODgGRlsXyhAILVsJeY1IpMgtW403fQbhlhHxPPmrbosUlKUT0Y+kahmlcy0QGivfS2in6GeGd15scfVImS1DPmuGYnQlNI6oInQTUwg85TPQlaMy7XLw8DTaMLAyMbSExJouzDYHOxWjOlXCyaUJhUA1Faru4k0EZLPLqDU1ldIRrLxPKDSG0ogAauMLxFe3E+tJYOdyeNM1zFwMITTu0XmucCRvWmHhlovY0sTAI2U06E6HrBm02DwEW4cCVnUKTi0kODn0ZsS6a6LgU4sCeuHCFnHLq8/dj9GokF+2mpknb6d+4gDNcp3s5ivQTmLJFTaFQE2MsSXcxVu3hlTmJnBrdVQYoH0o1MOJSpD6vYbIzfgavvUyAj9LgP/p1/4rZdenbHePmc357phQlxlWpC7ouz5KN7lkXTu1iTGOnmgiMx0I22SRfWtIiTd9lsK+Z7C7h+i89t1Y6Tzloy9gODYykWrtNF/kmAiN1CaiY5QJ1c7+I1M03SaOZeK6MDFfY/fRCgePzpFIx8mnUyivxorOJDOzdRa6MtjL2tBeiD/bjA59LdXRs03qpwuo0AdXobUiqIRYYoBaIKg1D2FlJH7Nx51rUN0zjWiGyHi0u29Ol5BSk1zViW3Aes/lw2vbMd0yhpNkvlLl8Z2TTMwGKNPCN+PMuw4vjJt851Q3B/vehli5DS2NKLjCy1WmCoT2aJw8QG38CN7MNGYYkN+8jfS6yxH5vlZ9Tyv/XyqTPfEIP7OtQps5T32hTOBrQuXjNXwKNf3FhcwVn8slDPWhf/MPrz7DP/f1B3nHDctIepVQy8xOrYNlhqHWWiaYwsCtltF+g8s3JMn6BZ47UET2jCBbmwMtTESjjJPLkRpYTvHAk8w/+BVKB5/BGdmA0znYSpVeGE8WmshXRkK+h0rnRvbXB3huLsvO+XaeH0ty7PgU27eNcvmWYZTboLywgF9bYP1gO6XxArO+CY5N7egs9WNzmEmHxNquSKXYMkmOdGC0O4SNkKDWTiAMyJ4mtiqPnUmgah6GY5Bc1Y2er1HbMwVll0RfO82JMm2HZvjI5g6s+lkCt0k2m2Z4xTC+EecbT7vs9DbwjL+GJ2or2R/bRm3lmxFdo+cVnOklqlT0RZRXj4j0OAPLSA+vwzAs3HqB0swUiWWbMXK9BK3NrgwE9T1P8LHVZ7loqE69VES5PoH2CN2Q+WLzSCVI/zunfmrKU4Jv3bf/1QEH+MWf/SCF409h2GbNt9ofCVzfkiJcZ1nKEVLg1pqYps/QcCePHYnh9q5Ci8hfDYTATKVpnDxMdfcjGNUigZJ0XPdu0msuRUkHRLA4rs+7q0QJjfRqVE8fRJenkMIgFCZ2UGVZcp6fuLmLrWuTTB4/yskTZzGFQb49Ty4bY1NvHGOswMm901jLu3BGsoR1n1AKnL4UbrFBY7yIMEA0Q6i2RTw9ewJlKKrH5zCkRXxZO36piltsksinCGcbeM+OU98zjTdZhrDI2pEcfrXJxOQseD6r1vezek0PsxVY0Hka8W5CI0lQmcCdm8RMpcGyLhA90AJMLVHSQPpVio9/B+/oc4RNF5lKkegZIdY9jNm3HGnFEUsq1DbMjnFZ7hSD6Rqu76MDn9ALmC+403MV69cG1IlHZtuuZrijj89+85HXBvxzX3+En/jYe2kUjmNaydqE/Zb7bfdQ3DL1taZtIFCk0224To4HTuYIe5dFXDGhMFAITAwnifCqVE4fJT0wCrZDdc8ToDzMruGX8LS1UESqwhCc2E9q3528KbGfmzqPcdvKCm+5KEZHvMHkkeMcOl7m0d1VRofb6OhMIqSFrRUjbSajGcXCeBVldjCc7Sc3pYmXDVJOgsr+CapzJTAtZD2NVi6+nqJ+cgHO1ujr66atYNE552AEmvKhs5jTZZIqYEWXxdu2D3LRynZyGZNiLeR7zy6QjoXEdJPh3gxXrU2yOTPDCnWIjoXdTO3aTdXpJja4CqTBy4acpESqkMr+Z6jvfRxDuNT3P0FtagyjYwhnxRrOpZVNlBmgQ0lyej8be+ooHaKCgHrNY2bB/+L42nv+u27u0wQl3v4zf8ErtZcEu9/+s3/Nzkf/ni3X/gRf+PfPBjq/uiIBqQRICAiImQJHh9TDKKOmiM4v0QJkro1moEj0DaGrReqHnyeIJXAG17TIjipKJGjR+oyMThwwbJJbbkB39XJg4vswfQZdmWH6gEfF8zhbjrG/to6AUyTisWjjrXzqjQYEMJC22NrRwbKt76W7bxDTMNFaUa6UOLNymt1T+9lbPsHM7DRoRWdXnrV9m9nYtYL+ngF6erqZPDvO5z/3tyTCkImmz5Wbctx0eZ58SpHMmIhAUXQEE34XX5lawaXNWVZOnsB2bHytmSglOFodxL/iGrLDF6ONl6mn0xBIhRl40KjSfcv7KaZS+Ed2ItMd9L7tZyHbS6AdBJpQKCQ+QhvIdBsTZx2qTY+4FVUGWZZBwmJD5/73ZE1LFD7w777Fq7WXPQJjy7U/wQsPf5Y9t38cI7/SXnpSJEHTJ2dLemJFZut1ZC4TlQwvuhp2grYN1zH/0JcQ0iC7/f3EVl2EcFKEhQnIdEYJDSWWfMvWlgYlDOTwJia7ljE2fYJw9gSmW0Y5CRheTrw4zWXZWfLZqLS2XponcBW1msGTx0PWbHsv/YPLKJdKJJNJhIB0Msvmte1cdvFF7D1+mL/b84+4jTofXvNhNq1dhwpDPF8xOTHFV770GZJiload5/Jtl2P5h/AadRoqxPU8stk0uVScrSMBj2cv4YH8IA/PnkB5TZQVg/ZlGCtXQSJ1jtf+4n25iOrCGqf2ULzvs6Q3XEvb1uupxbPM7fw+9XoDpzPeSra0CBIiCl6J1snHgeejpBmlYaQg7sj1Rr2+xm/6T/Ea7RXPPBEGxDsvJgjMOa1CIka0xGu4SFVlU1ecPbMT0JZFCdXah0W1ZySSpNddgpNKETYaFJ+6n8bEcXzh0/ve38DItbeObY5O+jmvL9BK4cfTiNGLMEc3oZWPmp7EOPIoa72HuWE9CGVSmikyXWhwZMbh2VmT4cHL2XDR1TQaTeLxOL7vI6QkmUyighC36bGsZ5CPv+8DlIslRvuGadSaWI5FJpXmofu/h1s5wbzr8N4P/RTXbr+Rv/3bT/O5Z5/l4o4KKzqqhA2PRCLGlStdSge/yc7iNTTXXIPdNQxmAkMHUQZwicf3UlUI2SJuW9luMOM0nvpuJCW+6Tq6r30P2olfWPlwXuFF2GiQs+sYOowA0lHQ1jRJW0IPCSP8pwMeeJImeURoH/KCaiUOaQPwA5dacZ6Lhwf4zonDNJvL0bbV0kWXyFBAJg+5XqYe+jp6dpzM8lWoZpnM6q0It4psxAgSiaXChgsngIgOv2mVOeG6lPc+Rn7icewenx3HoaECCk2H02KUudxG8sst3nrLpSgdIk2BaTj4vo9hRJ3i+x5aaaSUdHa04zg2fhgQCk1cZlA6YLRXcjbdyeYr30SjUecbX/0SW6+8ikOyl7vCkPzkfgYnx+mwazjSJOYHGGNPM9uUdF3TC0knIi0KidQv9rbPN+mKxuHnEIZJx/b3UHv2ezjxFLPP3UfbZW8h1rM8CtIs/vriLh0Js5MMx4rRfkmeLzSghBbaFud97ocGfOuNP85X/ugdBCH7/FAdUlpcChFNuj5XoHeojUvaxnhw4gzOyCo0Iaol8yGUxukZpOcdP0flme9SObCD7PpryF33Tuae+C7SSpG76jYCaYC+MP52AU1CC3CS5K97D7q8nScrs0i/ibBiiFQnIteBUzjDbW0NertyVCs1LMtECEEymcR1XWq1WuQKSYGWAtM0sUwT27QIQ0WtUSbm1WlPx/mZX/lPnJ0q84d/8PvMLxT4xMc+zls2r+XLMzbli29jX2kWXV1AeQ0wLMQlHXRlOtF2LLKAulXM+GJK1xIdW0NxiuLj3ySYPElsaDVGqKkUz9C9/YOIoZVEYh3neiOKXRjQrJGe283y0XkMaV9QmBEEynODcI7wtQF/1dLO3uEVxA59Z84LrO8GvkK3frvZaOBW57h5nSI39RxBoxHFohfVF9AoO4lOZqlXqhgj62i77t2EtSL+1DHKO+6icWLvUtRNnvd14WyP/tBWHDoGMUYvhtVXwujF6M4hpN9kQzjD9ZvX4LoNhCGQUmJZVkTyMwxisYjk53s+hpQYhomUBoZpLGr/UKtVSLSvxkrk8HyX9vYORkZGQMD1F6/lEmMB4dbQ7f2okc2IVVcilm+FzpHIBC8WWyzV3C0WX6hzsTWhUTPjzD11P13XvJv02stRtXmMtjyyZ4i6Y0Am31oCVGvgRPpxEvBPHmSTfYB8vIGdiLN4njoqwPP0pB84R0NS//QZDlCtFHBXbQdlfbPZ9H4yHlfDUUDcpFpYYKA3wa39gq+c2AcbLkZqo3W8lF4KOqTWX0Gmb4jaiZ0sPHM/8Z5hkmsux6uWiauQ8PxCQ/ESp61VyaJb6xURV15rAqkIjz1PhzPH04/VqPlBFLUDbNsmFouTyWTI5dpIJBLEYlGBXhAEKBUVEjiOg2mY1GpxqtUGpyb2UW9U2b59O0EQEIs5PPbow+TLVdRUEzZcFwVNeHFOu/W0+txzL/Hu0RgYhI0qs498jWRbHzLXQXrbrThnzzC38xFyl95IavlmlDrPNrRi7RKBP7tA19kH2DJ8lkQmixmL4bouCEEYKOqeeqIcrj3Vm1l4TcBf9USE//Zb/55K0yW+/UtzjSP/0GVb+hrbMiJpTmVgoBnssTh5pMi02Y9Mpy6srzZMYt1DVA4+x9xz99Jx6c2kt70Z0h0weYLKkV3EeocRptPCW7xk7dPnxSNbdRzROtksInd/n6GUQc1tIqVDOpUml4tAdhyHZrPJ5OQUY+PjNF2XZDJJEAQ0mk1s22ZiYoLTp05TrblI0yKVjJPN5kilU1iWTbPZZK5QxnPrTJw5jepbHcW2W/yTH6wI2kAbIRTnqO19HNGsUDt9mHjPMpyB5VjtHVi9IxjJ9mjwt6yEbIGt63WsF77Lm1NPs6JH0DE0jBCa0PcJg5BCoVFaqOnfTXDy6J//1+9xxn/1p3nNZ/7ap95L2JxDC2M0n/S/3ZlPbJKOwJAmpmmTastwZDbBX7ywisaWtyLjUS55MQeOgGD6bFR9atpUDj1D8/ghvOnjmO2D9P7YryBjmSW9wcXym3MkgXNd2xI+QAtIHL6f/L5vs2LVVkwTHAmJpEPcMRDKJwx9NBrTdNAYFIo1qo0ApE2z2cA0IZeO0ZaJY6EIdYhSCoSJljauq6nUXcIgxNMBJ47tZ37Nm6itvRmt5at25WJ9jhYgXZ/yrvupnzlAZuXFNE7uQ509Sv6m91E4vIf0hquw1lyCDhWSRd3FyCMyPJdw1wPc5H2HS4cKDG9YRTKexGvW8ZtNSoUqZ86UPjNfH/rFVML1Bpat54p3/8d/+gwH+JNP/iZWepTC2buLgWyrW4a6LR5zzKiIUqBDTUcGqFfZN2FjdvcvVQ0uxYnS7ajKPGPf+yzugadpy3ciYw7t170TYRhU9j+H096HWCpWfHFbXBdBSRCFs2yavoMBOUmjVsJwT2MHEwh/nLBxlmb5DKXSGKXCNLOFGcbmZjlbqlEpjtGcO4hfPs1src5UuUahNkN5/jjV8jhhbYygOU5QP01YPUlQO4tfHcetLTCQqJIVdSZiyyDZdp40yGI1afQltUDJEC2i0uvg7CEKO75Hfs1lWOkcycGVaK2YfOIO0sMbSG+5rqUU0RosGoTQ6FAR7nmcy2t3cWX/DKNrV5Hq7EAF0cx2G00mxot7Fir8imOUZ5TS3Pozf/Oa9uY1zx4d3PYx7vyrjyLymyhp8+tWde76lB183MnYUcFt6OM3m1w7FHB855M8f7qD+Og6fOljKCPK4yqgrY/eWz+BnDnJ+L2fpfOi64jnexn/7l/TLBfJrNyEkqDM2KuaHaENcD1Oh52MJdoiTRk7RdNOoMwEyoihTIfQiBFaMaQZxxCSwIpjVsdxFo6hFLiZIcLcAGeVRgQBRtDEUA2UdpFuHeVXsW0XR3kIt4qlGqhAEnhupBglFiVBL3y+yDUTGNrAFwbKjkPgUjr4XESlchtkNmyj+92/jNO9HN+KRWVCSyRFiVA+/v7n2Fq8g6uHzjKwapiOwX5cvwloAgUzU6XZmZL/H+xg7oh19a8SG//BjrL6wZYh4O//0xUkLJtQx1a0Z92v93alL7KtiC5sSgtNyFjB4B/2r2R2w0egI0+rkgqjlbw3pMDfv4P5J79H783vZn7HAwSnj5JYsxXd2Y1baZC/7l1RPforaJYuFuSFykNgoKWJIUx0fY5mYQ471wGZPEIJKM2im2WUsBHtXUjDQs9PEDTqWJlOjEx0BqiqLaClxIjnIhkRLyQsTyJzXQjDRIZhi+QTIqTVqiBZtDwvSnsKgajXaJzai7NsLdLMoKeO4BancAwH7+gualrQ/o6fQYSLFSPnXUBr/IPPcdH4N7l15DD9w130rFiLFROoRojXcBk7OdY4dWrmN/7s1O/+z59d/lc6nknxrp/93A+E4w98MuF/+v3fwL3hvyCe/6uFGpkpU/hvSsXMeOQKgRQmMeGRCSvsPesTdq9AmhKpQ2SLKKGRCMsm3dHN/PMPowOfWHcvZuBRPLaftg1XYXX3tzhzrTSqiI6WPKcrKtHCAikjbVQJolFg5r6v4B7dSeXkAdJDaxBSsnDfP9DY/zSNcpFEzxBCK6a++xmax56lfmovqZ4hRDJL8Yk7COYmSQxEov/eiReYvuMzpAdWIDJ5FJEapDAMFk33ogZMdK5aVOYjkQivRuhVmbv/a1ArEh9Zg8j1IYRk8vE78P2A/OW3IDPtUcxNtq63KKtw4ghrJr7D25efpK8vQ/vgAJbjYEiDIITZ8enwxKm5PxmrJP/kyvyjgUDx/l++/QeF8QeXWNpy1b/FveO38HPrKKYuunO+yF+Ua80w0lgxMYTEdmyWt5e4nKfwD+1ssVwXD4yLwq9Grht6lyO7Rshd+iYqZ45ROHOQ9mvfSmzdVlS9SmXX/TT2PYrhNSJXExFphy+K0C8pImikkLgzZ/Eq0wzc9mFSyzahwxadt1Yl0TtI++YrEOkcQimMwGfgoisxvCa1wkzUAW4NvFp0xHUo8E4fxm5UaZ45zLniqHNVn1pEurFKRDVhAolQBnJ+gtnv/A2Vx79D1+qNNA/uwD+4AxF6GLlu+t/ycbre8VNYg6vPeR9LCg8KNX6G4fG7eefacfq7U2Q6uxDCXiI+FqYX9PGTM39faOZ+Px8PXXTAj/3WXT8w2D8U4ADv+bm/R6smqeresBDY/2O64H/HbQYIoQikxoyZJNMm27qmWD55D+7kOErKJa1gJUICPEjlaNv+HkLfo1mvkrvmPTjrrkAKk9reJyjvuJfKCw9QfeERbBVJcEY0X847W+zcmqd9D1uCTHWQ2Xg5RiqJ0gpPB1QnT1AfP4VWOpLswmP6mfsQQLJ3GKUjIqYUUTZQNcrUJ06SGBjEPXsI4deXjvdYvK9ocdMkEgOJqJWoP/E1CjvvJR6zqT1zL83j+4iFHtP3/R3+2YNgWpDtQSdzF5AYoy2fJiiWyB2/j/evPstIhyaZTiNMEIQYQGGmxNHDZ74+W/J/O2aUKqiAbW//+A998M8PBTjANbf+OLX5s8RpFCvN+O/OLDT3E/iRVKaWpDIZ2tok1+UPETt4H0a1hpZiqerCaJl3hcLuHaX3Pb9IYtN1EAr86jzar5Bo6yO74Wp0bYGFx27HmxtHGApDR6rN59c0ahRWKo8ITJrHnmXmrn/EKyyAVFjSJDu8nvjAUFQ5ozRaWmSXb8QPQsIgksJFRUV9Ekk4N4ZXnkJJB29+Cj07gRAiqmZpRa+lNqMacVVHTx5j/uEv0Ty5j/Z1V5G+5M2k1l6OjBnENl8HMk756B6E9hH4GOG5UuGlZcF3sQ88xjuXHWW020ObcZQRSaYIYVJaqHJ03/F7Jqdqv2bjzVUrE6zbfgMrNv/4DwvfD39++J/8z6/yG7/+/2D3XYYae2K2pjNTllS3plJ2TBsG0rRwHAuas3iFKqe9fmTPQIvs2DoBqUUJFrEERkd3pGBcmWHq7i/SvmwNhRN7yG+6GrwqhYO7yK/ZQnH/DuyYRCYyII2lYJ5EI5ORXFj1+H6c7kGc0Q0Y0kLVSjQWZmguzBPv6Qc7jV+vEl9zCUqDkcxiZroI6wVkJo/VOYg7P0msrZeO696FpzVhIo2d7VqyKVpqpFIEk/spP/g1GmePkeoZwB0/TrMwhes36bjkRmZeeByrf5SOGz6MM7QGaSWj889FuCRQLAEtJf7hF7jFfpwbVzcJ/SZCSEzDxLTieE2XY4fHnpqcD37OEN7J6sxett32i2ze/ls/NNj/JMAB/uErD/P+G/tpqgRzbt8R6U9lk468Op6wQUgcx0JKie3Oc3JaUetYh4zFlz5/vhFSOmJuGmFI5dCzGLUifnGWdHc/szsfJ3fJTYh6mfJzD+KgKL7wGKZjYWU6wGgdkiMkVu8oiZWbMIfWgmmipYE9sJzUiotJjGyAWBIMk/jAckjno8RFOo9G43QNYrf3oQCjrZNY3zJ8K058YBlGtis6bktoZOBHagzVItOP3YF3cj9ta7aSvvwtNM4ewZsdp/ead9Csloi196GdNPbgOrQTJVcWvfXFOnEhISgWGBm7nw9vKWMFCwS+xjJMTMsiVHD6+NSh8anmzzhmc++H/sNj/Ma/+00ue9vv/JPA/icDDvDlO57nvTevxgkndc2V+4RuXppLOSOWZaANk1g8gW4UCMtljtT7MHsGXgT34u60VQJrx4h3dFOfPE1y+cWE8/O4YZWOrTcw/ci36Fy+nvrYCcyYSWnvsySzbXiVAnYiizSIWDcyokoJbUeiRAKUNKMThBAtwn/r/mLREwCEQSgWNd0lvmFEpxZIgRQgGhWkYeCfOczsN/+CWM8A+Utvxcm1Udy/g9jqzTjdyygd3IF7Yh/1+WnSW24kPrSGUFxYISwQCLGoxiSQB5/hw8NHGcnXqC0sIE0TyzQQ0mRiYnb29FT934jg+MNWxzt437UjvPln/vyfDPb/FuAAf/2Xn+Khr/1Xurry1ZovxxzDeEs6E0+IVhrSNiWqOs2xaYdm9wa0kzjv0+cJBLS4zjLTSXzlVmIDoxSO7MLyXdTsNCpokursoXDwefLrt1GZPEHMgPLBHSRH11Dc9TSGaiJ8DyuRIjSCSGmqdYrAEpd6UcFi8XsicoskEmVESlZCgBkoqM0Qzk9Sefpeys89QHPqOGa6jeq+J2jMjBMfWUt8ZB21/c/g1esk11+NadmoZIb2a96JTHdERQRavqgmXLQO9DNRpXlWzz7Oey4qU5mfJvQUhmUhLZtCseJNTlb+0/vvevBz79ywg3QM3vlLn/lh4Hn9Af/UX36J3/y1X6amExwsbjmdFcd70inrikTMiWrLY0n8WomFuSpnzXXI9g54UZZJtaomdIvOGx0yb+DkO2hMj+HW5+m++DoW9jyNDhssHNpFbt2V4DUxkjnibT1MP/5NbLdObfIEmaE1FJ97ECuZgVbpU3TGSBTlEqaF8Jut80iA0jRibgrTraPrFapHd2PHbcbu+zJmZZ7m8Rfov/rNlPY9SyKVwPfqZJMxSgefJbl8EzKdp3bgOZKrNmIOrCYxtA7txKOZDS2lyQsiM63/LILT+3hrxyFGcgXKMwsYpkDYJqrpMzHR+PpU0PPJD6z+vKdVwPt++QcLrLxW+6F36S9ut3ziT1F+jVXJR8NCQ//NzFzlqApbegSWJNfexkiygJ49hg4X88VRi/Ir8hwHQrfqx7XCyPfTfuvH6Xj3L+PaaWrCJHfJTcjOfvKbrqI6fYbksg2UTu4nkc2hG2VSjoMujtHc+zSG8rGCgIVHvoF/6CkWvv95KnufQrpl5r/3d7gHnkA2Kkzd8WkWHvoiM9/7DP6x56nvfADTVxhuIzrMQlpUzhxAmiZOvh/RbOBWGijlMvH9rxMfWkXnTe9H2w5KSILWu8ilmMHLl0mr0CdRGWdVj0ttoRDp2yGQIcwv1E5UmvoPsupsNWjO89Erful1Aft1ARxgdOVWega3sTrz0OH5kv+5cq0KIkoEJDMputKKdGMM7Xs/8DWjkKOJxMLsGaL77T+F6FxOrHMYv1HDdz3MmEn12C5SPSP4pVmqJw8wddfnsSwTnc2jgwBRmsXd8xgUZmhbtwU1O03j2PNUD+7A0hojDOhYtg7bNjEME1MY+G6ZZP8ooetiZjtZOLqf7FVvwRhZB7E2Ule8hc73/CbpzdcTxLKowZUYIo5UkaDhueH88m8W5QMadDBHLuZTq1SXRI6aNY9CVf/DhtoDe+J9l7Py0o8grr/+XxbgV73rP1ItneFU42bqnvn1hULzpFJRua0Vc8hmLLKqAL7Ly+pQnN8dLWZTlF7UBEKhrSxWsgNzaBUdN3wAo6MLu7OH8Xu/hoGNyHfhh5KuN30UO5tBdvYirAQ6dFG1IoVjO4gPrsVs66Q+dphU93JoNlCNBYx4nMm9T+OXa1F1ZtzGmzpNqnuIZq1Eon8ZJNtxhjcRWknSl90EQ6uhrZPE6k2R8oQKCYXGN2i5nq81lCHwm+SNJkbYxHO9aD+hNKVq81jNM768L30jzeIYV7355143sOEHyJb9oG3tRW/lwN5HeeRo17H2+OMPNXvc0WTawsQkno5hywAVBhgCRHRSy1LOWJwXwDy/jlwoQZRkDAlFCFiIpING0HXrT9GYPY3d1ok7NYboG8boHKIRmmT6RjGESeDXEdKhff111KaOky0v4J0+gKrMoXwP9+xRrESWeK6LmB1j4eR+EgNrqex7CiOdwG7rIrbmEmKJNCEabTg4ay8HLQm1QBNGJIXWqU2GCs8JnoqW6EH0JtGfSzkBFU0GQ6ICHxVqhAmeH1Br6HufkL984rrU7fSMrga++i8U8Gs+yH/9SB/b1/SG9Ubq3nq1/tFkOmVFhYYmSlst2WqBkDJSZ3Ab6GYTfBehwkjp0bQRdhJhm2AZkWtFJM0Z8cOiM0JVMoOd3ARoYvEc8cFVhFISX7kFa2h1pBwVePi5LrJX3UL1gW9S3f8MjWqJzqveSmPiDMUzx0l3dDO390nKTpLU5qtIr78GM91BiE98+SZIdtDWMRBdT/hoJKYOkWJROUm0+OI6KswPPYTnI4Lo2E4tQZkmhuWAaaNlNICFIWgi8YIw4s8IcD3ter54YLv/ST07ZvD+f/PZ1xXs1xVwgJt/4r9w8skvo3y9r1H3Z4E+JQRNX1PRcWTcQtWqeBMnMKePkauNkQtnickGptAobdIUNjWdomh10MgOQcdyRHs3JONRhky32DRaRLlnLZBmHKwYPprMxdsBEVGWc7103fLjhNkk+Vt+DCEEHR39xAZXYy6r45UmiWc76V15Mdg5yLYRGBJn8zWolomNwqCLZ6Kpc+67BrwAv1pCl+exSpM4tVniqkrKaJIwXCwRzf6GFlRIsGB14WeGEN3LkLE4pSCB67KkzOQHzGoztl+YMa655afhv73nXzbgl9/wU9z+x++kXKpMel44rpTuc4RkvmGzEGQQB/fSNruDFfIIa/IFevslqYSJbUUGPfQVbtOnXm9SqivmK0nG5nOcEMPMZVehe9ZjdPaj44lWQGNxkxRpuCI0Wke8cAyNKS2Mti4CITD6V0UbFhFJmehsB7FMO4oQI92JFgEoiVaRPJnWi+rP0SlNoRDRwTr1ImFxFnNhjHz1NL1ihr5UnYFMja7+gExckogJTKslZKQjjVXXtZitnuDQ3HPsPNTDVHwzs2WDubpNyhAorQk8NVeuqvmYY7Dxytcf7NcdcAAj5uBX664KgrJWmkDC2LyBNX+CK1O7uWaTYnQgRyLbh4xFR1xIw4kqKUQkvx16AY1KkfLCHKX5AgtzzzNZ3s3ho49w/OgKKh0boH8tRlsebcql03w0Grl4GJw28GUQifooC6HD6BRApdGYEe9MK1CLlsKI1mMhIsVDLSJ1JNcjLJcR82PEyyfoDsZYHl9gZXuD3pGQtjSkkjZOPIEZi7cInorA9wl8j8D1wWsSEyX6EwH9IyZXBiV2TUzxQFUyUbRZn44Rhj4qDBv1WsPT4esOyz8f4EpqPEOhlECokGrNJWnU+KVbkqxd3kYyk8YwzUgcyDBaJIbF0xcMhONgpy2Snd10rFhL6IfU5qYojJ1mw/QcswuPc7ywiz17hplMbMDtXo3oGkQkE0taY6GMfPmWIgpaRuJ1ulDAP7oLU3qE+RFUpgPDSYIZraFhGKLcJqpRhXIJpzJOzp+iz5xmVbbKyDKX7mxIIhZJedmxDFYiiRWPR4f4SYPAbaK9BiIMEdqIWDIqYvkGfoDr1QjcBTbGJhi6qIvAdDANh9D3UTqUpkAY8nVxnn5EgDc9YgG2MIwUIkQHTa65rIdsPo0KNW69QRAowlaRnGkYWLaDGYthxW0cKZCG3eJtSsy4Q65/iHR7O53lEj2zMyybmeHS8lHGSmc5OP0kh88MMZdYRdA+hMx3IWKJKKKGgiAkbFZg/DS9c09zQ/9ZOtNwYv4ZxudTlMI0ror0akzhkTKatNs1ehMN+kd8OtOKlBNiGlGpkmHFMGxn6UuaVqQj0wqfytYBu2gIQx/fb+J7Hr4X4PsBOgjQYUjgesTUUZx4Eh8bLSS2YaZybW0xyzbL/1yA/3DZ89doT935h5w58ABBoFatHMrcP7SsezBUTbyqolRVC7Vq/XC12TzUbPhjYSBLCBkgQssyrVw8bvcn4ubyVC6zItPe1plr7zAT2TbMmE0YhgReE+U30IFP0PRxKwvUi/M0q3UKNRgv2Rwtphnz2iipDK5MoTCI0aDLmGddvsLm3gqxsID2ajjxDNKJEWLht/LSplQRsDo6wUBrv1X94SAtE2lbmKaDYVpIy0HaFpZpYbSIqw03oFIohfVSvVKtNGa9Rm3ca3ozWhtlFSpPoyShnyAUndpojhihP2CEpI2kQTIWp+mL6bl67Ba02rPy0ney6fqff90Bf11n+I7H7qS3Q2E6ztpYzOgpFxtMTRb2leeq3ygG9t3Vqnn4785sL336hm/qYjNFqEJMyyCT9PiHb/TJVcuPpTLpqcFE0tmUzSVvyHXkr+7u71qR72w3bcdGIFBagimwM0mMeIxEo0GiWaOnWedir4wblGgEJs1AIgHHgZSpMHSDWrlJvdog8GsUFqpIFKbpIB0LaRoYwoxOODIVwjCwDBtpmgjTjPTU9GJuz0CHima1QrHeUJVKY6ZWDY7Uav7zjUbz+cDn2HxJjQsjXyw2M819XZ8OP3+P0NwPf/anX5bdPGaH3pl8QoQrlF/dbjfcd9pGuNmQVpcI65vxq3v+5I9ff7CjYf06tu98+meZsq6X2am//MuOTOytzZBPzxQTX7i8/fnTu4trMOwOYl3dpNp68Wolbv3QH/Dol38TYSUJG0WmZ8YI3FlsO+TbX63Ka2/NDeTarGvb84m3d3e2X9vW3d6dyqYw0ISBF0lh+wFh4Eem0vPwfZdQRWZThwFhGOJ7AZ5bjUyqLwn9oPXlR3lu00TaJqZp4Zgmpm1Gpw9aNqYpoxltRrl+FWjqDa9WabgnatXg6Wqt8WS14e0s1qyTv/QHj1e+9SfbCEOLmueQzvUQi9lYhkHMSYAB1cICAoNiaQzLrxM7/TDF0Zt7U4b3XksGP1/zwuen46M/kVE1/2P/7tv/sgH/8l/8IkqHab98/OMyCJ74cN+DO7+y8A46u5fjN4q85Rf+/jWv8fR3fouH7n2A1WvXUarMkLZLHD/lOL09xoZcxnl7vjPxto729vW5trQtHYEOwmjD4weoICQMogEQ+l5UjuO7hEE0QEIvwK37+EGARqGUF9GuTBvDtDAtgWlZGHY04xEGWhn4oe81fTXjNsL9Tc9/punLJ8qu2LPj1LaZm1d/TzWCJGaim/7e5UwXxlk3cjHrb/3V13zXO/7uJ3Gy/cwfe5LM/H4W2tavCBA3ynjP10EufPxX//FfNuDf+dwfo1UgC6mrcfb9jsoObyFsFHj7DwD0y7W7v/TveeZLf8DaG95P6C2wcu0ke3YO9GbS4ppsRrw3m0lem21LdyfiNoYQKBUVC14AeOChvP+vvbv3aSoK4zj+O/fc3pdWWihvaq2oYCAlMaksQjQatHFBJyHERVmM4mqMCzqYGJ00MZJgoptMKAtGxYhRmQxaNQxEgryYUAqk9u229/aec4+DujhKY0PSzx9w8pznu59TgGVaSGZYMp1zHgk48xLoEQV2i0ScOkqJSmUiEUoFCCmA0LQDOc5tLDKHfskxK2oJzOQM39LemolcwgyDyT54vA04eW4Q0bFBhLv6/3lvT+73oWpnCCvRF3h/5SX2Dw1InDvO2Ys3ilsbRQ7+dPgOIBwYxhoWvl5C++F7OHTi6obPFULg8e1e+P3bEV/9Bsp+YCnjVes0I+Tdohx1e9SIx01bdV2qdblkhfz+Tsu2bVj5As9nrXjWFJMZrjxIai2vg4lRe72iU3OzRL0oGAFKLB8Il4WgDJwYVNHXc8Szumb6U+3quP0dAXCXDlWtR2PDPizOf0bbgW4EO3qKtrupqSF8fDMLXeeQZDcY4zjTf7OYeQAUOfj/MDk2gINd1zFy9zSsVAw+dwZzawFPhZoO6ordrCpqswSnWnAugcpZy2KzBUY/mdg2p5J5S/PuQm3rMaxPj8PJpyEsAxJMSBIHd+ivh3I0D5jLB1mrRGWVHx/evkP3hfPYHe4r9fU3bNMF/0MIgeFbp7AjuAfLK8tg5ioUkoRkx9EZcuBvqsLoyBKY1ogCfKBqNWamn+F412V09Fwr9fgls2mD/y02+xBbm0KIRRfwauI5kokEOiMR1ASakM2k0NjWW+oRy8rKysrKiuknKM5A82xUdycAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDctMTRUMDA6NDY6MTgrMDA6MDAlRn3BAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTA3LTE0VDAwOjQ2OjE4KzAwOjAwVBvFfQAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyNi0wNy0xNFQwMDo0NjozMiswMDowMOVbvJEAAAAASUVORK5CYII=" alt="Logo SD Negeri Reksosari 01"/></div>
+          <h1>SIMAS</h1>
+          <h4 style="text-align: center;">Sistem Manajemen Sekolah</h4>
+          <div class="login-sub">${SCHOOL}</div>
+          ${err ? `<div class="err-msg">${esc(err)}</div>` : ""}
+          <div class="field"><label>Username</label><input id="login-user" placeholder="Masukkan username" autocomplete="username"/></div>
+          <div class="field"><label>Kata Sandi</label><input id="login-pass" type="password" placeholder="Masukkan kata sandi" autocomplete="current-password"/></div>
+          <button class="btn btn-primary" onclick="PresensiApp.login()">Masuk</button>
+          <div class="login-hint"> Login dengan akun yang diberikan oleh admin.</div>
+        </div>
+      </div>`;
+    document.getElementById("login-pass").addEventListener("keydown", e=>{ if(e.key==="Enter") login(); });
+  }
+
+  async function login(){
+    const u = document.getElementById("login-user").value.trim();
+    const p = document.getElementById("login-pass").value;
+    if(!u || !p) return renderLogin("Username dan kata sandi wajib diisi.");
+    const admin = await getData("admin", {username:"admin", password:"admin123"});
+    if(u===admin.username && p===admin.password){
+      state.user = {username:u, nama:"Administrator", role:"admin"};
+      return renderAdmin("guru");
+    }
+    const gurus = await getData("guru_list", []);
+    const g = gurus.find(x=>x.username===u && x.password===p);
+    if(g){
+      const role = g.penugasan==="Kepala Sekolah" ? "kepsek" : "guru";
+      state.user = Object.assign({}, g, {role});
+      return role==="guru" ? renderGuru("input") : renderKepsek("monitor");
+    }
+    renderLogin("Username atau kata sandi salah. Hubungi admin jika lupa.");
+  }
+  function logout(){ state.user=null; renderLogin(); }
+
+  // ================= SHELL =================
+  function shell(navItems, activeKey, contentHtml, roleLabel){
+    root.innerHTML = `
+      <div class="shell">
+        <div class="side">
+          <div class="side-brand">
+            <div class="name">${SCHOOL}</div>
+            <div class="role">${roleLabel}</div>
+          </div>
+          ${navItems.map(n=>`<div class="nav-item ${n.key===activeKey?'active':''}" onclick="PresensiApp.go('${n.key}')">
+              <span class="nav-icon">${n.icon}</span> ${n.label}</div>`).join("")}
+          <div class="side-logout" onclick="PresensiApp.logout()">↩ Keluar (${esc(state.user.nama||state.user.username)})</div>
+        </div>
+        <div class="main" id="main">${contentHtml}</div>
+      </div>`;
+  }
+
+  // ================= ADMIN =================
+  const adminNav = [
+    {key:"guru", label:"Kelola Guru", icon:"👤"},
+    {key:"murid", label:"Kelola Murid", icon:"🎒"},
+    {key:"usia", label:"Rekap Usia Murid", icon:"🎂"},
+    {key:"monitor", label:"Pantau Presensi", icon:"📊"},
+    {key:"laporan", label:"Unduh Laporan", icon:"⬇"},
+    {key:"kalender", label:"Hari Efektif", icon:"📅"},
+    {key:"semester", label:"Laporan Semester", icon:"📈"},
+    {key:"akun", label:"Akun Admin", icon:"⚙"},
+  ];
+
+  async function renderAdmin(tab){
+    state.view = {area:"admin", tab};
+    let content = "";
+    if(tab==="guru") content = await guruManageHtml();
+    else if(tab==="murid") content = await muridManageHtml();
+    else if(tab==="usia") content = await usiaHtml();
+    else if(tab==="monitor") content = await monitorHtml();
+    else if(tab==="laporan") content = await laporanAdminHtml();
+    else if(tab==="kalender") content = await kalenderHtml();
+    else if(tab==="semester"){ const s = semesterDefaults(); content = await semesterHtml(s.kelas, s.tahunAwal, s.semester); }
+    else if(tab==="akun") content = adminAccountHtml();
+    shell(adminNav, tab, content, "Administrator");
+    wireTabExtras(tab);
+  }
+
+  async function guruManageHtml(){
+    const gurus = await getData("guru_list", []);
+    const rows = gurus.map(g=>{
+      const penugasanLabel = isMapelPenugasan(g.penugasan) && g.mapel
+        ? `${esc(g.penugasan)} — ${esc(g.mapel)}${(g.kelasAjar&&g.kelasAjar.length)? " (Kelas "+g.kelasAjar.join(", ")+")":""}`
+        : esc(g.penugasan);
+      return `
+      <tr>
+        <td>${esc(g.nama)}</td>
+        <td>${esc(g.nip)}</td>
+        <td>${penugasanLabel}</td>
+        <td>${esc(g.username)}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="PresensiApp.editGuru('${g.id}')">Ubah</button>
+          <button class="btn btn-danger btn-sm" onclick="PresensiApp.deleteGuru('${g.id}')">Hapus</button>
+        </td>
+      </tr>`;}).join("");
+    return `
+      <div class="topbar"><div><h2>Kelola Data Guru</h2><div class="desc">Tambahkan akun guru, wali kelas, guru mata pelajaran, dan kepala sekolah.</div></div></div>
+      <div class="card">
+        <div class="card-title" id="guru-form-title">Tambah Guru</div>
+        <input type="hidden" id="guru-edit-id"/>
+        <div class="row-form">
+          <div class="field"><label>Nama Lengkap</label><input id="g-nama" placeholder="Nama guru"/></div>
+          <div class="field"><label>NIP</label><input id="g-nip" placeholder="Nomor Induk Pegawai"/></div>
+          <div class="field"><label>Penugasan</label><select id="g-penugasan" onchange="PresensiApp.onGuruPenugasanChange()">${penugasanOptions()}</select></div>
+          <div class="field"><label>Username</label><input id="g-username" placeholder="username login"/></div>
+          <div class="field"><label>Kata Sandi</label><input id="g-password" placeholder="kata sandi"/></div>
+        </div>
+        <div class="field hidden" id="g-mapel-wrap" style="margin-top:10px;max-width:320px;">
+          <label>Nama Mata Pelajaran</label><input id="g-mapel" placeholder="Misal: Pendidikan Agama Islam"/>
+        </div>
+        <div class="hidden" id="g-kelasajar-wrap" style="margin-top:10px;">
+          <label style="display:block;font-size:12.5px;font-weight:600;color:var(--navy-2);margin-bottom:6px;">Kelas yang Diajar</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            ${KELAS_LIST.map(k=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;">
+              <input type="checkbox" class="g-kelasajar-cb" value="${k}"/> Kelas ${k}</label>`).join("")}
+          </div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn btn-gold" onclick="PresensiApp.saveGuru()">Simpan Guru</button>
+          <button class="btn btn-outline hidden" id="guru-cancel" onclick="PresensiApp.cancelGuruEdit()">Batal Ubah</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Daftar Guru &amp; Kepala Sekolah (${gurus.length})</div>
+        ${gurus.length? `<table><thead><tr><th>Nama</th><th>NIP</th><th>Penugasan</th><th>Username</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table>`
+          : `<div class="empty"><div class="big">👤</div>Belum ada data guru. Tambahkan menggunakan formulir di atas.</div>`}
+      </div>`;
+  }
+
+  function onGuruPenugasanChange(){
+    const val = document.getElementById("g-penugasan").value;
+    const isMapel = isMapelPenugasan(val);
+    document.getElementById("g-mapel-wrap").classList.toggle("hidden", !isMapel);
+    document.getElementById("g-kelasajar-wrap").classList.toggle("hidden", !isMapel);
+  }
+  async function saveGuru(){
+    const id = document.getElementById("guru-edit-id").value;
+    const nama = document.getElementById("g-nama").value.trim();
+    const nip = document.getElementById("g-nip").value.trim();
+    const penugasan = document.getElementById("g-penugasan").value;
+    const username = document.getElementById("g-username").value.trim();
+    const password = document.getElementById("g-password").value;
+    const isMapel = isMapelPenugasan(penugasan);
+    const mapel = isMapel ? document.getElementById("g-mapel").value.trim() : "";
+    const kelasAjar = isMapel ? [...document.querySelectorAll(".g-kelasajar-cb:checked")].map(cb=>cb.value) : [];
+    if(!nama || !username || !password) return toast("Nama, username, dan kata sandi wajib diisi.");
+    if(isMapel && kelasAjar.length===0) return toast("Pilih minimal satu kelas yang diajar untuk guru mapel.");
+    let gurus = await getData("guru_list", []);
+    if(gurus.some(g=>g.username===username && g.id!==id)) return toast("Username sudah dipakai guru lain.");
+    if(id){
+      gurus = gurus.map(g=> g.id===id ? {...g, nama, nip, penugasan, username, password, mapel, kelasAjar} : g);
+    } else {
+      gurus.push({id:uid("g"), nama, nip, penugasan, username, password, mapel, kelasAjar});
+    }
+    await setData("guru_list", gurus);
+    toast("Data guru tersimpan.");
+    renderAdmin("guru");
+  }
+  async function editGuru(id){
+    const gurus = await getData("guru_list", []);
+    const g = gurus.find(x=>x.id===id); if(!g) return;
+    await renderAdmin("guru");
+    document.getElementById("guru-form-title").textContent = "Ubah Guru";
+    document.getElementById("guru-edit-id").value = g.id;
+    document.getElementById("g-nama").value = g.nama;
+    document.getElementById("g-nip").value = g.nip;
+    document.getElementById("g-penugasan").value = g.penugasan;
+    document.getElementById("g-username").value = g.username;
+    document.getElementById("g-password").value = g.password;
+    document.getElementById("g-mapel").value = g.mapel || "";
+    (g.kelasAjar||[]).forEach(k=>{
+      const cb = document.querySelector(`.g-kelasajar-cb[value="${k}"]`); if(cb) cb.checked = true;
+    });
+    onGuruPenugasanChange();
+    document.getElementById("guru-cancel").classList.remove("hidden");
+  }
+  function cancelGuruEdit(){ renderAdmin("guru"); }
+  function deleteGuru(id){
+    showConfirm("Hapus data guru ini?", async ()=>{
+      let gurus = await getData("guru_list", []);
+      gurus = gurus.filter(g=>g.id!==id);
+      await setData("guru_list", gurus);
+      toast("Data guru dihapus.");
+      renderAdmin("guru");
+    });
+  }
+
+  async function muridManageHtml(){
+    const murid = await getData("murid_list", []);
+    const byKelas = {};
+    murid.forEach(m=>{ (byKelas[m.kelas]=byKelas[m.kelas]||[]).push(m); });
+    const rows = murid.sort((a,b)=> (a.kelas+a.nama).localeCompare(b.kelas+b.nama)).map(m=>`
+      <tr>
+        <td><input type="checkbox" class="murid-row-check" value="${m.id}" onchange="PresensiApp.onMuridRowCheck()"/></td>
+        <td>${esc(m.nama)}</td><td>${esc(m.nisn)}</td><td>Kelas ${esc(m.kelas)}</td>
+        <td>${m.jk==="P"?"Perempuan":m.jk==="L"?"Laki-laki":"-"}</td>
+        <td>${esc(m.agama)||"-"}</td>
+        <td>${esc(m.tempat_lahir)||"-"}${m.tanggal_lahir? ", "+fmtDateID(m.tanggal_lahir) : ""}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="PresensiApp.editMurid('${m.id}')">Ubah</button>
+          <button class="btn btn-danger btn-sm" onclick="PresensiApp.deleteMurid('${m.id}')">Hapus</button>
+        </td>
+      </tr>`).join("");
+    return `
+      <div class="topbar"><div><h2>Kelola Data Murid</h2><div class="desc">Tambah satu per satu, atau impor banyak murid sekaligus dari file CSV/Excel.</div></div></div>
+      <div class="card">
+        <div class="card-title" id="murid-form-title">Tambah Murid</div>
+        <input type="hidden" id="murid-edit-id"/>
+        <div class="row-form">
+          <div class="field"><label>Nama Lengkap</label><input id="m-nama" placeholder="Nama murid"/></div>
+          <div class="field"><label>NISN</label><input id="m-nisn" placeholder="Nomor Induk Siswa Nasional"/></div>
+          <div class="field"><label>Kelas</label><select id="m-kelas">${KELAS_LIST.map(k=>`<option value="${k}">Kelas ${k}</option>`).join("")}</select></div>
+          <div class="field"><label>Jenis Kelamin</label><select id="m-jk">${JK_LIST.map(o=>`<option value="${o.v}">${o.l}</option>`).join("")}</select></div>
+          <div class="field"><label>Agama</label><select id="m-agama">${AGAMA_LIST.map(a=>`<option value="${a}">${a}</option>`).join("")}</select></div>
+          <div class="field"><label>Tempat Lahir</label><input id="m-tempat" placeholder="Tempat lahir"/></div>
+          <div class="field"><label>Tanggal Lahir</label><input type="date" id="m-tgl"/></div>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <button class="btn btn-gold" onclick="PresensiApp.saveMurid()">Simpan Murid</button>
+          <button class="btn btn-outline hidden" id="murid-cancel" onclick="PresensiApp.cancelMuridEdit()">Batal Ubah</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Impor dari File Excel / CSV</div>
+        <div class="muted" style="margin-bottom:8px;">File harus memiliki baris judul kolom berisi <b>nama</b>, <b>nisn</b>, dan <b>kelas</b> (urutan kolom bebas). Kolom opsional: <b>jenis kelamin</b>, <b>agama</b>, <b>tempat lahir</b>, <b>tanggal lahir</b>. Format didukung: .csv, .xlsx, .xls.</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <button class="btn btn-outline btn-sm" onclick="PresensiApp.downloadTemplateMurid()">⬇ Unduh Template Impor (Excel)</button>
+          <span class="muted" style="font-size:12px;">Unduh templat ini, isi datanya, lalu unggah kembali melalui kolom di bawah.</span>
+        </div>
+        <input type="file" id="file-import-input" accept=".csv,.xlsx,.xls" onchange="PresensiApp.handleFileImport(event)"/>
+        <div id="import-preview"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          Daftar Murid (${murid.length})
+          <div id="murid-bulk-actions" style="display:none;gap:8px;">
+            <button class="btn btn-danger btn-sm" onclick="PresensiApp.deleteSelectedMurid()">🗑 Hapus Terpilih (<span id="murid-selected-count">0</span>)</button>
+          </div>
+        </div>
+        ${murid.length? `<table><thead><tr>
+            <th style="width:34px;"><input type="checkbox" id="murid-select-all" onchange="PresensiApp.toggleSelectAllMurid(this.checked)"/></th>
+            <th>Nama</th><th>NISN</th><th>Kelas</th><th>L/P</th><th>Agama</th><th>Tempat, Tgl Lahir</th><th>Aksi</th></tr></thead><tbody>${rows}</tbody></table>`
+          : `<div class="empty"><div class="big">🎒</div>Belum ada data murid.</div>`}
+      </div>`;
+  }
+  async function saveMurid(){
+    const id = document.getElementById("murid-edit-id").value;
+    const nama = document.getElementById("m-nama").value.trim();
+    const nisn = document.getElementById("m-nisn").value.trim();
+    const kelas = document.getElementById("m-kelas").value;
+    const jk = document.getElementById("m-jk").value;
+    const agama = document.getElementById("m-agama").value;
+    const tempat_lahir = document.getElementById("m-tempat").value.trim();
+    const tanggal_lahir = document.getElementById("m-tgl").value;
+    if(!nama) return toast("Nama murid wajib diisi.");
+    let murid = await getData("murid_list", []);
+    if(id) murid = murid.map(m=> m.id===id ? {...m, nama, nisn, kelas, jk, agama, tempat_lahir, tanggal_lahir} : m);
+    else murid.push({id:uid("m"), nama, nisn, kelas, jk, agama, tempat_lahir, tanggal_lahir});
+    await setData("murid_list", murid);
+    toast("Data murid tersimpan.");
+    renderAdmin("murid");
+  }
+  async function editMurid(id){
+    const murid = await getData("murid_list", []);
+    const m = murid.find(x=>x.id===id); if(!m) return;
+    await renderAdmin("murid");
+    document.getElementById("murid-form-title").textContent="Ubah Murid";
+    document.getElementById("murid-edit-id").value=m.id;
+    document.getElementById("m-nama").value=m.nama;
+    document.getElementById("m-nisn").value=m.nisn;
+    document.getElementById("m-kelas").value=m.kelas;
+    if(m.jk) document.getElementById("m-jk").value=m.jk;
+    if(m.agama) document.getElementById("m-agama").value=m.agama;
+    document.getElementById("m-tempat").value=m.tempat_lahir||"";
+    document.getElementById("m-tgl").value=m.tanggal_lahir||"";
+    document.getElementById("murid-cancel").classList.remove("hidden");
+  }
+  function cancelMuridEdit(){ renderAdmin("murid"); }
+  function deleteMurid(id){
+    showConfirm("Hapus data murid ini?", async ()=>{
+      let murid = await getData("murid_list", []);
+      murid = murid.filter(m=>m.id!==id);
+      await setData("murid_list", murid);
+      toast("Data murid dihapus.");
+      renderAdmin("murid");
+    });
+  }
+
+  // ---- pilih semua / hapus massal murid ----
+  function toggleSelectAllMurid(checked){
+    document.querySelectorAll(".murid-row-check").forEach(cb=> cb.checked = checked);
+    onMuridRowCheck();
+  }
+  function onMuridRowCheck(){
+    const all = document.querySelectorAll(".murid-row-check");
+    const checked = document.querySelectorAll(".murid-row-check:checked");
+    const selectAll = document.getElementById("murid-select-all");
+    if(selectAll){
+      selectAll.checked = all.length>0 && checked.length===all.length;
+      selectAll.indeterminate = checked.length>0 && checked.length<all.length;
+    }
+    const bulkBar = document.getElementById("murid-bulk-actions");
+    const countEl = document.getElementById("murid-selected-count");
+    if(countEl) countEl.textContent = checked.length;
+    if(bulkBar) bulkBar.style.display = checked.length>0 ? "flex" : "none";
+  }
+  function deleteSelectedMurid(){
+    const ids = [...document.querySelectorAll(".murid-row-check:checked")].map(cb=>cb.value);
+    if(!ids.length) return;
+    showConfirm(`Hapus ${ids.length} murid terpilih? Tindakan ini tidak dapat dibatalkan.`, async ()=>{
+      let murid = await getData("murid_list", []);
+      murid = murid.filter(m=> !ids.includes(m.id));
+      await setData("murid_list", murid);
+      toast(`${ids.length} murid berhasil dihapus.`);
+      renderAdmin("murid");
+    }, {yesLabel:`Hapus ${ids.length} Murid`, yesClass:"btn-danger"});
+  }
+
+  // ---- template impor murid ----
+  function downloadTemplateMurid(){
+    const headers = ["nama","nisn","kelas","jenis kelamin","agama","tempat lahir","tanggal lahir"];
+    const contoh = [
+      ["Ahmad Budi Santoso","0091234567","1","L","Islam","Semarang","2019-05-12"],
+      ["Siti Nur Aisyah","0091234568","1","P","Islam","Kabupaten Semarang","2019-08-23"]
+    ];
+    const wsData = [headers, ...contoh];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = [{wch:24},{wch:14},{wch:8},{wch:14},{wch:16},{wch:18},{wch:14}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template Murid");
+    XLSX.writeFile(wb, "Template_Impor_Data_Murid.xlsx");
+    toast("Template impor diunduh. Isi data lalu unggah kembali file ini.");
+  }
+
+  function handleFileImport(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    const isCSV = /\.csv$/i.test(file.name);
+    const reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        const workbook = isCSV
+          ? XLSX.read(e.target.result, {type:"string"})
+          : XLSX.read(e.target.result, {type:"array"});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
+        processImportRows(json);
+      }catch(err){
+        console.error(err);
+        toast("Gagal membaca file. Pastikan format CSV/Excel benar.");
+      }
+    };
+    reader.onerror = function(){ toast("Gagal membaca file."); };
+    if(isCSV) reader.readAsText(file); else reader.readAsArrayBuffer(file);
+  }
+
+  function processImportRows(json){
+    if(!json || !json.length){ toast("File kosong atau format tidak dikenali."); return; }
+    const keys = Object.keys(json[0]);
+    const findKey = (pattern) => keys.find(k => pattern.test((k||"").toString().trim()));
+    const kNama = findKey(/nama/i);
+    const kNisn = findKey(/nisn/i);
+    const kKelas = findKey(/kelas/i);
+    const kJk = findKey(/jenis\s*kelamin|^jk$|gender/i);
+    const kAgama = findKey(/agama/i);
+    const kTempat = findKey(/tempat/i);
+    const kTgl = findKey(/tanggal\s*lahir|tgl\s*lahir|tgl_lahir/i);
+    if(!kNama){ toast("Kolom 'nama' tidak ditemukan. Pastikan baris judul kolom berisi nama, nisn, kelas."); return; }
+    const normJk = (v)=>{
+      v = (v||"").toString().trim().toUpperCase();
+      if(v.startsWith("L")) return "L";
+      if(v.startsWith("P")) return "P";
+      return "";
+    };
+    const normTgl = (v)=>{
+      if(!v) return "";
+      if(v instanceof Date && !isNaN(v)) return v.getFullYear()+"-"+pad(v.getMonth()+1)+"-"+pad(v.getDate());
+      const s = v.toString().trim();
+      let m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+      if(m) return m[1]+"-"+pad(+m[2])+"-"+pad(+m[3]);
+      m = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/.exec(s);
+      if(m) return m[3]+"-"+pad(+m[2])+"-"+pad(+m[1]);
+      return "";
+    };
+    pendingImportRows = json.map(row=>({
+      nama: (row[kNama]||"").toString().trim(),
+      nisn: kNisn ? (row[kNisn]||"").toString().trim() : "",
+      kelas: kKelas ? (row[kKelas]||"").toString().replace(/\D/g,"") : "",
+      jk: kJk ? normJk(row[kJk]) : "",
+      agama: kAgama ? (row[kAgama]||"").toString().trim() : "",
+      tempat_lahir: kTempat ? (row[kTempat]||"").toString().trim() : "",
+      tanggal_lahir: kTgl ? normTgl(row[kTgl]) : ""
+    })).filter(r=>r.nama);
+    if(!pendingImportRows.length){ toast("Tidak ada baris data murid yang valid ditemukan."); return; }
+    renderImportPreview();
+  }
+
+  function renderImportPreview(){
+    const container = document.getElementById("import-preview");
+    if(!container) return;
+    if(!pendingImportRows.length){ container.innerHTML = ""; return; }
+    const missingKelas = pendingImportRows.filter(r=>!r.kelas).length;
+    const previewRows = pendingImportRows.slice(0,8).map((r,i)=>`
+      <tr><td>${i+1}</td><td>${esc(r.nama)}</td><td>${esc(r.nisn)||"-"}</td><td>${esc(r.kelas)||"⚠ kosong"}</td></tr>`).join("");
+    container.innerHTML = `
+      <div class="muted" style="margin:10px 0 6px;">Pratinjau ${pendingImportRows.length} data (menampilkan ${Math.min(8,pendingImportRows.length)} pertama)${missingKelas? ` — <span style="color:#B3261E;">${missingKelas} baris tanpa kelas, akan diisi Kelas 1</span>`:""}:</div>
+      <table><thead><tr><th>No</th><th>Nama</th><th>NISN</th><th>Kelas</th></tr></thead><tbody>${previewRows}</tbody></table>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn btn-gold" onclick="PresensiApp.confirmFileImport()">Konfirmasi &amp; Simpan ${pendingImportRows.length} Murid</button>
+        <button class="btn btn-outline" onclick="PresensiApp.cancelFileImport()">Batal</button>
+      </div>`;
+  }
+
+  async function confirmFileImport(){
+    if(!pendingImportRows.length) return;
+    let murid = await getData("murid_list", []);
+    pendingImportRows.forEach(r=>{
+      murid.push({id:uid("m"), nama:r.nama, nisn:r.nisn, kelas:r.kelas||"1",
+        jk:r.jk||"", agama:r.agama||"", tempat_lahir:r.tempat_lahir||"", tanggal_lahir:r.tanggal_lahir||""});
+    });
+    await setData("murid_list", murid);
+    const count = pendingImportRows.length;
+    pendingImportRows = [];
+    toast(`${count} murid berhasil diimpor.`);
+    renderAdmin("murid");
+  }
+  function cancelFileImport(){
+    pendingImportRows = [];
+    const el = document.getElementById("file-import-input"); if(el) el.value = "";
+    renderImportPreview();
+  }
+
+  // ---- rekap usia murid ----
+  async function usiaHtml(ym){
+    ym = ym || thisMonthStr();
+    const murid = await getData("murid_list", []);
+    const isCurrentMonth = ym === thisMonthStr();
+    const refDate = isCurrentMonth ? todayStr() : `${ym}-${pad(daysInMonth(ym))}`;
+
+    // hitung usia tiap murid pada tanggal referensi (akhir bulan terpilih, atau hari ini jika bulan berjalan)
+    const withAge = murid.map(m=>{
+      const usia = calcAge(m.tanggal_lahir, refDate);
+      const grp = usiaGroupOf(usia);
+      return {...m, usia, grp};
+    });
+    const belumAda = withAge.filter(m=>m.usia===null).length;
+
+    // tabel: baris kelas, kolom kelompok usia
+    let theadCols = USIA_GROUPS.map(g=>`<th style="text-align:center;">${g.label}</th>`).join("");
+    let rows = "";
+    const totalPerGroup = {}; USIA_GROUPS.forEach(g=>totalPerGroup[g.key]=0);
+    let totalMurid = 0;
+    for(const k of KELAS_LIST){
+      const list = withAge.filter(m=>m.kelas===k);
+      const counts = {}; USIA_GROUPS.forEach(g=>counts[g.key]=0);
+      list.forEach(m=>{ if(m.grp){ counts[m.grp.key]++; totalPerGroup[m.grp.key]++; } });
+      totalMurid += list.length;
+      rows += `<tr><td><b>Kelas ${k}</b></td>${USIA_GROUPS.map(g=>`<td style="text-align:center;">${counts[g.key]||0}</td>`).join("")}<td style="text-align:center;font-weight:700;">${list.length}</td></tr>`;
+    }
+    const totalRow = `<tr style="background:#f7f9fc;"><td><b>Total</b></td>${USIA_GROUPS.map(g=>`<td style="text-align:center;font-weight:700;">${totalPerGroup[g.key]}</td>`).join("")}<td style="text-align:center;font-weight:700;">${totalMurid}</td></tr>`;
+
+    return `
+      <div class="topbar">
+        <div><h2>Rekap Usia Murid</h2><div class="desc">Dikelompokkan menurut usia per tanggal ${fmtDateID(refDate)}${isCurrentMonth? " (hari ini)":" (akhir bulan)"}.</div></div>
+        <div class="field" style="min-width:180px;"><label>Pilih Bulan</label>
+          <input type="month" id="usia-month" value="${ym}" onchange="PresensiApp.changeUsiaMonth(this.value)"/></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Rekap Kelompok Usia per Kelas</div>
+        <table><thead><tr><th>Kelas</th>${theadCols}<th style="text-align:center;">Jumlah</th></tr></thead>
+        <tbody>${rows}${totalRow}</tbody></table>
+        ${belumAda? `<div class="muted" style="margin-top:10px;">⚠ ${belumAda} murid belum memiliki data tanggal lahir sehingga tidak masuk hitungan kelompok usia. Lengkapi di menu Kelola Murid.</div>` : ""}
+      </div>`;
+  }
+  async function changeUsiaMonth(ym){
+    document.getElementById("main").innerHTML = await usiaHtml(ym);
+  }
+
+  // ---- monitoring ----
+  async function monitorHtml(ym){
+    ym = ym || thisMonthStr();
+    const murid = await getData("murid_list", []);
+    const today = new Date();
+    const isCurrentMonth = ym === thisMonthStr();
+    const upTo = isCurrentMonth ? today.getDate() : daysInMonth(ym);
+    const effDays = Math.max(await effectiveDaysUpTo(ym, upTo), 1);
+
+    let rows="";
+    for(const k of KELAS_LIST){
+      const jumlahMurid = murid.filter(m=>m.kelas===k).length;
+      const data = await getData(`presensi:${k}:${ym}`, {});
+      const filled = Object.keys(data).length;
+      const pct = Math.round((filled/effDays)*100);
+      const badgeClass = pct>=80?"badge-ok":pct>=50?"badge-warn":"badge-low";
+      rows += `<tr>
+        <td>Kelas ${k}</td>
+        <td>${jumlahMurid} murid</td>
+        <td>${filled} / ${effDays} hari</td>
+        <td><span class="badge ${badgeClass}">${pct}%</span></td>
+      </tr>`;
+    }
+    return `
+      <div class="topbar">
+        <div><h2>Pantau Progres Presensi</h2><div class="desc">Persentase hari yang sudah diisi guru dibanding hari efektif (sesuai pengaturan kalender) bulan berjalan.</div></div>
+        <div class="field" style="min-width:180px;"><label>Pilih Bulan</label>
+          <input type="month" id="monitor-month" value="${ym}" onchange="PresensiApp.changeMonitorMonth(this.value)"/></div>
+      </div>
+      <div class="card">
+        <table><thead><tr><th>Kelas</th><th>Jumlah Murid</th><th>Hari Terisi</th><th>Progres</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      </div>`;
+  }
+  async function changeMonitorMonth(ym){
+    document.getElementById("main").innerHTML = await monitorHtml(ym);
+  }
+
+  async function laporanAdminHtml(){
+    return `
+      <div class="topbar"><div><h2>Unduh Laporan Presensi</h2><div class="desc">Pilih kelas dan bulan, lalu unduh rekap dalam format Excel.</div></div></div>
+      <div class="card">
+        <div class="row-form">
+          <div class="field"><label>Kelas</label><select id="rep-kelas">${KELAS_LIST.map(k=>`<option value="${k}">Kelas ${k}</option>`).join("")}</select></div>
+          <div class="field"><label>Bulan</label><input type="month" id="rep-bulan" value="${thisMonthStr()}"/></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-gold" onclick="PresensiApp.downloadRecap(document.getElementById('rep-kelas').value, document.getElementById('rep-bulan').value)">⬇ Unduh Excel</button>
+          <button class="btn btn-outline" onclick="PresensiApp.printRecap(document.getElementById('rep-kelas').value, document.getElementById('rep-bulan').value)">🖶 Cetak / Simpan PDF</button>
+        </div>
+      </div>`;
+  }
+  function adminAccountHtml(){
+    return `
+      <div class="topbar"><div><h2>Akun Admin</h2><div class="desc">Ubah username dan kata sandi login administrator.</div></div></div>
+      <div class="card" style="max-width:420px;">
+        <div class="field"><label>Username</label><input id="adm-user" placeholder="username"/></div>
+        <div class="field"><label>Kata Sandi Baru</label><input id="adm-pass" type="password" placeholder="kata sandi baru"/></div>
+        <button class="btn btn-gold" onclick="PresensiApp.saveAdminAccount()">Simpan Perubahan</button>
+      </div>`;
+  }
+  async function saveAdminAccount(){
+    const u = document.getElementById("adm-user").value.trim();
+    const p = document.getElementById("adm-pass").value;
+    if(!u || !p) return toast("Username dan kata sandi wajib diisi.");
+    await setData("admin", {username:u, password:p});
+    toast("Akun admin diperbarui. Gunakan username/kata sandi baru saat login berikutnya.");
+  }
+
+  // ---- pengaturan hari efektif belajar ----
+  let pendingEfektifMap = null; // staged in-memory before save
+  let pendingEfektifYm = null;
+
+  async function kalenderHtml(ym){
+    ym = ym || thisMonthStr();
+    if(pendingEfektifYm !== ym){
+      pendingEfektifMap = await getEfektifMap(ym);
+      pendingEfektifYm = ym;
+    }
+    const n = daysInMonth(ym);
+    const [y,m] = ym.split("-").map(Number);
+    let jumlahEfektif = 0;
+    const dayCells = [];
+    for(let d=1; d<=n; d++){
+      const dow = new Date(y, m-1, d).getDay();
+      const isEfektif = !!pendingEfektifMap[d];
+      if(isEfektif) jumlahEfektif++;
+      const isMinggu = dow===0;
+      dayCells.push(`
+        <div style="border:1.5px solid var(--line);border-radius:8px;padding:8px 6px;text-align:center;background:${isEfektif?'#fff':'#FBEAE9'};">
+          <div style="font-size:11px;color:${isMinggu?'var(--red)':'var(--muted)'};">${HARI_NAMA[dow]}</div>
+          <div style="font-family:Georgia,serif;font-size:16px;font-weight:bold;color:var(--navy-2);margin:2px 0 6px;">${d}</div>
+          <button class="btn btn-sm ${isEfektif?'btn-gold':'btn-outline'}" style="width:100%;padding:4px 4px;font-size:11px;"
+            onclick="PresensiApp.toggleHariEfektif(${d})">${isEfektif? 'Efektif':'Libur'}</button>
+        </div>`);
+    }
+    return `
+      <div class="topbar">
+        <div><h2>Pengaturan Hari Efektif Belajar</h2><div class="desc">Tandai tanggal sebagai <b>Efektif</b> (hari sekolah/masuk) atau <b>Libur</b> untuk 1 bulan. Bawaan: Senin–Sabtu efektif, Minggu libur. Pengaturan ini dipakai untuk menghitung persentase kehadiran &amp; progres presensi.</div></div>
+        <div class="field" style="min-width:180px;"><label>Pilih Bulan</label>
+          <input type="month" id="kalender-month" value="${ym}" onchange="PresensiApp.changeKalenderMonth(this.value)"/></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          ${BULAN_NAMA[m-1]} ${y} — <span id="kalender-jumlah">${jumlahEfektif}</span> hari efektif dari ${n} hari
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline btn-sm" onclick="PresensiApp.resetKalenderDefault()">Kembalikan Bawaan</button>
+            <button class="btn btn-gold btn-sm" onclick="PresensiApp.saveKalender()">Simpan Pengaturan</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px;" id="kalender-grid">
+          ${dayCells.join("")}
+        </div>
+      </div>`;
+  }
+  async function changeKalenderMonth(ym){
+    document.getElementById("main").innerHTML = await kalenderHtml(ym);
+  }
+  function toggleHariEfektif(d){
+    if(!pendingEfektifMap) return;
+    pendingEfektifMap[d] = !pendingEfektifMap[d];
+    kalenderHtml(pendingEfektifYm).then(html=>{ document.getElementById("main").innerHTML = html; });
+  }
+  async function resetKalenderDefault(){
+    pendingEfektifMap = defaultEfektifMap(pendingEfektifYm);
+    document.getElementById("main").innerHTML = await kalenderHtml(pendingEfektifYm);
+  }
+  async function saveKalender(){
+    if(!pendingEfektifMap || !pendingEfektifYm) return;
+    const ok = await setData(`hari_efektif:${pendingEfektifYm}`, pendingEfektifMap, true);
+    if(ok) toast("Pengaturan hari efektif untuk "+pendingEfektifYm+" tersimpan.");
+    else toast("Gagal menyimpan. Coba lagi.");
+  }
+
+  function wireTabExtras(tab){
+    if(tab==="semester" && lastSemesterMonths) drawSemesterChart(lastSemesterMonths);
+  }
+
+  // ================= KEPALA SEKOLAH =================
+  const kepsekNav = [
+    {key:"monitor", label:"Pantau Presensi", icon:"📊"},
+    {key:"laporan", label:"Unduh Laporan", icon:"⬇"},
+    {key:"semester", label:"Laporan Semester", icon:"📈"},
+  ];
+  async function renderKepsek(tab){
+    state.view = {area:"kepsek", tab};
+    let content;
+    if(tab==="laporan") content = await laporanAdminHtml();
+    else if(tab==="semester"){ const s = semesterDefaults(); content = await semesterHtml(s.kelas, s.tahunAwal, s.semester); }
+    else content = await monitorHtml();
+    shell(kepsekNav, tab, content, "Kepala Sekolah");
+    wireTabExtras(tab);
+  }
+
+  // ---- laporan semester (akhir semester): grafik batang + tanda tangan ----
+  let semState = null;
+  let lastSemesterMonths = null;
+  function semesterDefaults(){
+    if(semState) return semState;
+    const now = new Date();
+    const mo = now.getMonth()+1, yr = now.getFullYear();
+    const semester = (mo>=7) ? "ganjil" : "genap";
+    const tahunAwal = (mo>=7) ? yr : yr-1;
+    semState = {kelas: KELAS_LIST[0], tahunAwal, semester};
+    return semState;
+  }
+  function semesterYearOptions(centerYear){
+    const arr=[]; for(let y=centerYear-3;y<=centerYear+1;y++) arr.push(y); return arr;
+  }
+  function monthsForSemester(tahunAwal, semester){
+    if(semester==="ganjil"){
+      return [7,8,9,10,11,12].map(mo=>({ym: tahunAwal+"-"+pad(mo), mo, label: BULAN_NAMA[mo-1].slice(0,3)}));
+    } else {
+      const ty = tahunAwal+1;
+      return [1,2,3,4,5,6].map(mo=>({ym: ty+"-"+pad(mo), mo, label: BULAN_NAMA[mo-1].slice(0,3)}));
+    }
+  }
+  async function computeSemesterRecap(kelas, tahunAwal, semester){
+    const monthsDef = monthsForSemester(tahunAwal, semester);
+    const monthly = [];
+    let totals = {H:0,I:0,S:0,A:0};
+    let denomTotal = 0;
+    let jumlahMuridLatest = 0;
+    for(const mo of monthsDef){
+      const {jumlahMurid, hariEfektif, totals:t, classPct} = await computeRecap(kelas, mo.ym);
+      jumlahMuridLatest = jumlahMurid;
+      denomTotal += jumlahMurid * hariEfektif;
+      totals.H += t.H; totals.I += t.I; totals.S += t.S; totals.A += t.A;
+      monthly.push({label: mo.label, ym: mo.ym, classPct, hariEfektif, jumlahMurid});
+    }
+    const round1 = n => Math.round(((n*100)*(1/100))*1000)/1000;
+    const denom = Math.max(denomTotal, 1);
+    const classPctSemester = {
+      sakit: round1(totals.S/denom),
+      izin: round1(totals.I/denom),
+      alpha: round1(totals.A/denom),
+      ketidakhadiran: round1((totals.I+totals.S+totals.A)/denom)
+    };
+    return {months: monthly, totals, jumlahMurid: jumlahMuridLatest, denom, classPctSemester};
+  }
+  function drawSemesterChart(months, canvasArg){
+    const canvas = canvasArg || document.getElementById("semester-chart");
+    if(!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+    const padding = {left:42, right:14, top:22, bottom:34};
+    const chartW = W - padding.left - padding.right;
+    const chartH = H - padding.top - padding.bottom;
+    const allVals = months.flatMap(m=>[m.classPct.sakit, m.classPct.izin, m.classPct.alpha]);
+    const maxVal = Math.max(10, ...allVals) * 1.15;
+    ctx.strokeStyle = "#DCE2EC"; ctx.fillStyle = "#6B7686"; ctx.font = "10px Arial"; ctx.lineWidth = 1;
+    const steps = 4;
+    for(let i=0;i<=steps;i++){
+      const val = maxVal/steps*i;
+      const y = padding.top + chartH - (val/maxVal)*chartH;
+      ctx.beginPath(); ctx.moveTo(padding.left,y); ctx.lineTo(W-padding.right,y); ctx.stroke();
+      ctx.fillText(Math.round(val)+"%", 4, y+3);
+    }
+    const groupW = chartW / months.length;
+    const barW = groupW / 5;
+    const colors = {sakit:"#2E5395", izin:"#B4720A", alpha:"#B3261E"};
+    months.forEach((mo,i)=>{
+      const gx = padding.left + i*groupW;
+      ["sakit","izin","alpha"].forEach((key,j)=>{
+        const val = mo.classPct[key];
+        const barH = (val/maxVal)*chartH;
+        const bx = gx + groupW*0.15 + j*barW*1.15;
+        const by = padding.top + chartH - barH;
+        ctx.fillStyle = colors[key];
+        ctx.fillRect(bx, by, barW, Math.max(barH,0));
+      });
+      ctx.fillStyle = "#1B2430"; ctx.font = "11px Arial"; ctx.textAlign = "center";
+      ctx.fillText(mo.label, gx + groupW/2, H - padding.bottom + 16);
+    });
+    ctx.textAlign = "left";
+    const legend = [["Sakit",colors.sakit],["Izin",colors.izin],["Alpha",colors.alpha]];
+    let lx = padding.left;
+    legend.forEach(([label,color])=>{
+      ctx.fillStyle = color; ctx.fillRect(lx, 4, 10, 10);
+      ctx.fillStyle = "#1B2430"; ctx.font = "11px Arial"; ctx.fillText(label, lx+14, 13);
+      lx += 62;
+    });
+  }
+  async function semesterHtml(kelas, tahunAwal, semester){
+    const {months, classPctSemester, jumlahMurid, denom} = await computeSemesterRecap(kelas, tahunAwal, semester);
+    lastSemesterMonths = months;
+    const signer = await getSignerNames(kelas);
+    const semesterLabel = semester==="ganjil" ? `Ganjil ${tahunAwal}/${tahunAwal+1}` : `Genap ${tahunAwal}/${tahunAwal+1}`;
+    const yearOpts = semesterYearOptions(tahunAwal);
+    return `
+      <div class="topbar">
+        <div><h2>Laporan Semester — Kelas ${kelas}</h2><div class="desc">Rekap akumulasi kehadiran satu semester dalam bentuk grafik batang, lengkap dengan tanda tangan guru kelas dan kepala sekolah.</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="field" style="min-width:110px;"><label>Kelas</label>
+            <select onchange="PresensiApp.changeSemesterFilter(this.value, null, null)">
+              ${KELAS_LIST.map(k=>`<option value="${k}" ${k===kelas?"selected":""}>Kelas ${k}</option>`).join("")}
+            </select></div>
+          <div class="field" style="min-width:130px;"><label>Tahun Ajaran</label>
+            <select onchange="PresensiApp.changeSemesterFilter(null, this.value, null)">
+              ${yearOpts.map(ty=>`<option value="${ty}" ${ty===tahunAwal?"selected":""}>${ty}/${ty+1}</option>`).join("")}
+            </select></div>
+          <div class="field" style="min-width:120px;"><label>Semester</label>
+            <select onchange="PresensiApp.changeSemesterFilter(null, null, this.value)">
+              <option value="ganjil" ${semester==="ganjil"?"selected":""}>Ganjil</option>
+              <option value="genap" ${semester==="genap"?"selected":""}>Genap</option>
+            </select></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          Grafik Persentase Ketidakhadiran per Bulan — Semester ${semesterLabel}
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold btn-sm" onclick="PresensiApp.downloadSemesterPdf('${kelas}',${tahunAwal},'${semester}')">🖶 Cetak / Simpan PDF</button>
+          </div>
+        </div>
+        <canvas id="semester-chart" width="680" height="320" style="width:100%;max-width:680px;height:auto;"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Rekap Akumulasi Semester (${jumlahMurid} murid × total hari efektif = ${denom} hari-murid)</div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="num" style="color:#2E5395;">${classPctSemester.sakit}%</div><div class="lbl">Sakit</div></div>
+          <div class="stat-box"><div class="num" style="color:#B4720A;">${classPctSemester.izin}%</div><div class="lbl">Izin</div></div>
+          <div class="stat-box"><div class="num" style="color:#B3261E;">${classPctSemester.alpha}%</div><div class="lbl">Alpha</div></div>
+          <div class="stat-box"><div class="num" style="color:#1E7B45;">${classPctSemester.ketidakhadiran}%</div><div class="lbl">Ketidakhadiran</div></div>
+        </div>
+        <table style="margin-top:14px;"><thead><tr><th>Bulan</th><th>% Sakit</th><th>% Izin</th><th>% Alpha</th><th>% Ketidakhadiran</th></tr></thead>
+        <tbody>${months.map(mo=>`<tr><td>${mo.label}</td><td>${mo.classPct.sakit}%</td><td>${mo.classPct.izin}%</td><td>${mo.classPct.alpha}%</td><td>${mo.classPct.ketidakhadiran}%</td></tr>`).join("")}</tbody></table>
+        <div class="muted" style="margin-top:14px;">Ditandatangani pada akhir semester oleh wali kelas dan kepala sekolah.</div>
+        <div style="display:flex;justify-content:space-around;margin-top:26px;text-align:center;font-size:13.5px;">
+          <div>Mengetahui,<br/>Kepala Sekolah<br/><br/><br/><br/><b>${esc(signer.kepsek.nama)}</b><br/>NIP. ${esc(signer.kepsek.nip)||"-"}</div>
+          <div>Reksosari, ${fmtDateID(todayStr())}<br/>Guru Kelas ${kelas}<br/><br/><br/><br/><b>${esc(signer.wali.nama)}</b><br/>NIP. ${esc(signer.wali.nip)||"-"}</div>
+        </div>
+      </div>`;
+  }
+  async function changeSemesterFilter(kelas, tahunAwal, semester){
+    const s = semesterDefaults();
+    if(kelas) s.kelas = kelas;
+    if(tahunAwal) s.tahunAwal = parseInt(tahunAwal,10);
+    if(semester) s.semester = semester;
+    const html = await semesterHtml(s.kelas, s.tahunAwal, s.semester);
+    document.getElementById("main").innerHTML = html;
+    drawSemesterChart(lastSemesterMonths);
+  }
+  async function downloadSemesterPdf(kelas, tahunAwal, semester){
+    const {months, classPctSemester, jumlahMurid, denom} = await computeSemesterRecap(kelas, tahunAwal, semester);
+    const signer = await getSignerNames(kelas);
+    const semesterLabel = semester==="ganjil" ? `Ganjil ${tahunAwal}/${tahunAwal+1}` : `Genap ${tahunAwal}/${tahunAwal+1}`;
+    const todayFmt = fmtDateID(todayStr());
+    const chartCanvas = document.createElement("canvas");
+    chartCanvas.width = 900; chartCanvas.height = 420;
+    drawSemesterChart(months, chartCanvas);
+    const chartImg = chartCanvas.toDataURL("image/png");
+
+    try{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(14);
+      doc.text(SCHOOL, pageW/2, 16, {align:"center"});
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10.5);
+      doc.text(`Laporan Semester ${semesterLabel} — Kelas ${kelas}`, pageW/2, 23, {align:"center"});
+
+      const imgW = pageW - 36; const imgH = imgW * (420/900);
+      doc.addImage(chartImg, "PNG", 18, 30, imgW, imgH);
+
+      let yPos = 30 + imgH + 8;
+      doc.autoTable({
+        startY: yPos,
+        margin:{left:18,right:18},
+        head: [["Bulan","% Sakit","% Izin","% Alpha","% Ketidakhadiran"]],
+        body: months.map(mo=>[mo.label, mo.classPct.sakit+"%", mo.classPct.izin+"%", mo.classPct.alpha+"%", mo.classPct.ketidakhadiran+"%"]),
+        styles:{ font:"helvetica", fontSize:9, cellPadding:2.5, halign:"center" },
+        headStyles:{ fillColor:[31,56,100], textColor:255 },
+        theme:"grid"
+      });
+
+      let y2 = doc.lastAutoTable.finalY + 8;
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(9.5);
+      doc.text(`Rekap Akumulasi Semester (${jumlahMurid} murid × total hari efektif = ${denom} hari-murid)`, 18, y2);
+      doc.autoTable({
+        startY: y2 + 3,
+        margin:{left:18,right:18},
+        tableWidth: 130,
+        body: [
+          ["% Sakit", classPctSemester.sakit+"%"],
+          ["% Izin", classPctSemester.izin+"%"],
+          ["% Alpha", classPctSemester.alpha+"%"],
+          ["% Ketidakhadiran (Izin+Sakit+Alpha)", classPctSemester.ketidakhadiran+"%"]
+        ],
+        styles:{ font:"helvetica", fontSize:9, cellPadding:2.5 },
+        columnStyles:{ 1:{halign:"center"} },
+        theme:"grid"
+      });
+
+      let sigY = doc.lastAutoTable.finalY + 20;
+      if(sigY > pageH - 45){ doc.addPage("a4","portrait"); sigY = 30; }
+      const leftX = pageW*0.27, rightX = pageW*0.75;
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10);
+      doc.text("Mengetahui,", leftX, sigY, {align:"center"});
+      doc.text("Kepala Sekolah", leftX, sigY+5, {align:"center"});
+      doc.text(`Reksosari, ${todayFmt}`, rightX, sigY, {align:"center"});
+      doc.text(`Guru Kelas ${kelas}`, rightX, sigY+5, {align:"center"});
+
+      const nameY = sigY + 30;
+      doc.text(signer.kepsek.nama, leftX, nameY, {align:"center"});
+      doc.text(`NIP. ${signer.kepsek.nip||"-"}`, leftX, nameY+5, {align:"center"});
+      doc.text(signer.wali.nama, rightX, nameY, {align:"center"});
+      doc.text(`NIP. ${signer.wali.nip||"-"}`, rightX, nameY+5, {align:"center"});
+
+      showPdfPreview(doc, `Laporan_Semester_${semester}_${tahunAwal}_Kelas${kelas}.pdf`);
+    }catch(err){
+      console.error(err);
+      toast("Gagal membuat PDF. Coba lagi.");
+    }
+  }
+
+  // ================= GURU =================
+  const guruNav = [
+    {key:"input", label:"Input Presensi", icon:"✅"},
+    {key:"rekap", label:"Rekap Bulanan", icon:"📋"},
+  ];
+  let mapelState = { kelas:null, tanggal:null, rekapKelas:null, rekapYm:null };
+  async function renderGuru(tab){
+    state.view = {area:"guru", tab};
+    const kelas = kelasFromPenugasan(state.user.penugasan);
+    const isMapel = isMapelPenugasan(state.user.penugasan) && (state.user.kelasAjar||[]).length>0;
+    let content;
+    if(kelas){
+      content = tab==="rekap" ? await rekapGuruHtml(kelas) : await inputPresensiHtml(kelas, todayStr());
+    } else if(isMapel){
+      content = tab==="rekap" ? await rekapMapelHtml() : await inputPresensiMapelHtml();
+    } else {
+      content = `<div class="card"><div class="empty"><div class="big">⚠</div>Akun Anda belum ditugaskan sebagai wali kelas atau guru mata pelajaran.<br/>Hubungi admin untuk pengaturan penugasan.</div></div>`;
+    }
+    const roleLabel = "Guru — " + esc(state.user.penugasan||"") + (isMapel && state.user.mapel ? " (" + esc(state.user.mapel) + ")" : "");
+    shell(guruNav, tab, content, roleLabel);
+  }
+
+  async function inputPresensiHtml(kelas, tanggal){
+    const murid = await getData("murid_list", []);
+    const list = murid.filter(m=>m.kelas===kelas).sort((a,b)=>a.nama.localeCompare(b.nama));
+    const ym = tanggal.slice(0,7);
+    const monthData = await getData(`presensi:${kelas}:${ym}`, {});
+    const dayData = monthData[tanggal] || {};
+
+    const rows = list.map(m=>{
+      const cur = dayData[m.id] || "";
+      return `<div class="att-row">
+        <div><div class="att-name">${esc(m.nama)}</div><div class="att-nisn">NISN ${esc(m.nisn)||"-"}</div></div>
+        <div class="seg" data-murid="${m.id}">
+          ${["H","I","S","A"].map(s=>`<button class="sel-${s} ${cur===s?'on':''}" onclick="PresensiApp.setStatus('${m.id}','${s}')">${s}</button>`).join("")}
+        </div>
+      </div>`;
+    }).join("");
+
+    return `
+      <div class="topbar">
+        <div><h2>Input Presensi — Kelas ${kelas}</h2><div class="desc">Pilih Hadir (H) / Izin (I) / Sakit (S) / Alpha (A) untuk setiap murid.</div></div>
+        <div class="field" style="min-width:180px;"><label>Tanggal</label>
+          <input type="date" id="presensi-tanggal" value="${tanggal}" onchange="PresensiApp.changeTanggal(this.value)"/></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          ${fmtDateID(tanggal)}
+          <button class="btn btn-outline btn-sm" onclick="PresensiApp.markAllHadir()">Tandai Semua Hadir</button>
+        </div>
+        ${list.length? `<div id="att-list">${rows}</div>` : `<div class="empty"><div class="big">🎒</div>Belum ada murid terdaftar di Kelas ${kelas}. Hubungi admin.</div>`}
+        ${list.length? `<div style="margin-top:14px;"><button class="btn btn-primary" style="width:auto;" onclick="PresensiApp.saveAttendance('${kelas}','${tanggal}')">Simpan Presensi</button></div>`:""}
+      </div>`;
+  }
+
+  let pendingStatus = {}; // muridId -> status, staged before save
+  function setStatus(muridId, status){
+    pendingStatus[muridId] = status;
+    const seg = document.querySelector(`.seg[data-murid="${muridId}"]`);
+    seg.querySelectorAll("button").forEach(b=>b.classList.remove("on"));
+    seg.querySelector(".sel-"+status).classList.add("on");
+  }
+  function markAllHadir(){
+    document.querySelectorAll("#att-list .seg").forEach(seg=>{
+      const id = seg.getAttribute("data-murid");
+      setStatus(id, "H");
+    });
+  }
+  async function changeTanggal(val){
+    pendingStatus = {};
+    const kelas = kelasFromPenugasan(state.user.penugasan);
+    document.getElementById("main").innerHTML = await inputPresensiHtml(kelas, val);
+  }
+  async function saveAttendance(kelas, tanggal){
+    const murid = await getData("murid_list", []);
+    const list = murid.filter(m=>m.kelas===kelas);
+    // gather current UI state (from segs) merged with pendingStatus
+    const dayResult = {};
+    document.querySelectorAll("#att-list .seg").forEach(seg=>{
+      const id = seg.getAttribute("data-murid");
+      const onBtn = seg.querySelector("button.on");
+      if(onBtn){
+        const cls = [...onBtn.classList].find(c=>c.startsWith("sel-"));
+        dayResult[id] = cls.replace("sel-","");
+      }
+    });
+    const doSave = async ()=>{
+      const ym = tanggal.slice(0,7);
+      const monthData = await getData(`presensi:${kelas}:${ym}`, {});
+      monthData[tanggal] = dayResult;
+      const ok = await setData(`presensi:${kelas}:${ym}`, monthData);
+      if(ok){ toast("Presensi tanggal " + fmtDateID(tanggal) + " tersimpan."); pendingStatus={}; }
+      else toast("Gagal menyimpan. Coba lagi.");
+    };
+    if(Object.keys(dayResult).length < list.length){
+      showConfirm(
+        `Masih ada murid yang belum ditandai (${list.length - Object.keys(dayResult).length} murid). Simpan tetap dilanjutkan?`,
+        doSave,
+        {yesLabel:"Simpan", yesClass:"btn-gold"}
+      );
+    } else {
+      await doSave();
+    }
+  }
+
+  // ---- guru mapel: input presensi (hanya pada hari mengajar) ----
+  async function inputPresensiMapelHtml(){
+    const kelasList = state.user.kelasAjar || [];
+    if(!mapelState.kelas || !kelasList.includes(mapelState.kelas)) mapelState.kelas = kelasList[0] || null;
+    const kelas = mapelState.kelas;
+    if(!kelas) return `<div class="card"><div class="empty"><div class="big">⚠</div>Belum ada kelas yang ditugaskan untuk Anda. Hubungi admin.</div></div>`;
+    const tanggal = mapelState.tanggal || todayStr();
+    const murid = await getData("murid_list", []);
+    const list = murid.filter(m=>m.kelas===kelas).sort((a,b)=>a.nama.localeCompare(b.nama));
+    const ym = tanggal.slice(0,7);
+    const monthData = await getData(`presensi_mapel:${state.user.id}:${kelas}:${ym}`, {});
+    const dayData = monthData[tanggal] || {};
+
+    const rows = list.map(m=>{
+      const cur = dayData[m.id] || "";
+      return `<div class="att-row">
+        <div><div class="att-name">${esc(m.nama)}</div><div class="att-nisn">NISN ${esc(m.nisn)||"-"}</div></div>
+        <div class="seg" data-murid="${m.id}">
+          ${["H","I","S","A"].map(s=>`<button class="sel-${s} ${cur===s?'on':''}" onclick="PresensiApp.setStatus('${m.id}','${s}')">${s}</button>`).join("")}
+        </div>
+      </div>`;
+    }).join("");
+
+    return `
+      <div class="topbar">
+        <div><h2>Input Presensi Mapel — ${esc(state.user.mapel||"Mata Pelajaran")}</h2><div class="desc">Isi presensi hanya pada hari Anda mengajar kelas ini (bukan setiap hari efektif).</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="field" style="min-width:130px;"><label>Kelas</label>
+            <select onchange="PresensiApp.changeMapelKelas(this.value)">
+              ${kelasList.map(k=>`<option value="${k}" ${k===kelas?"selected":""}>Kelas ${k}</option>`).join("")}
+            </select></div>
+          <div class="field" style="min-width:180px;"><label>Tanggal Pertemuan</label>
+            <input type="date" value="${tanggal}" onchange="PresensiApp.changeMapelTanggal(this.value)"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          ${fmtDateID(tanggal)} — Kelas ${kelas}
+          <button class="btn btn-outline btn-sm" onclick="PresensiApp.markAllHadir()">Tandai Semua Hadir</button>
+        </div>
+        ${list.length? `<div id="att-list">${rows}</div>` : `<div class="empty"><div class="big">🎒</div>Belum ada murid terdaftar di Kelas ${kelas}. Hubungi admin.</div>`}
+        ${list.length? `<div style="margin-top:14px;"><button class="btn btn-primary" style="width:auto;" onclick="PresensiApp.saveAttendanceMapel('${kelas}','${tanggal}')">Simpan Presensi Pertemuan</button></div>`:""}
+      </div>`;
+  }
+  async function changeMapelKelas(k){
+    mapelState.kelas = k; pendingStatus = {};
+    document.getElementById("main").innerHTML = await inputPresensiMapelHtml();
+  }
+  async function changeMapelTanggal(v){
+    mapelState.tanggal = v; pendingStatus = {};
+    document.getElementById("main").innerHTML = await inputPresensiMapelHtml();
+  }
+  async function saveAttendanceMapel(kelas, tanggal){
+    const murid = await getData("murid_list", []);
+    const list = murid.filter(m=>m.kelas===kelas);
+    const dayResult = {};
+    document.querySelectorAll("#att-list .seg").forEach(seg=>{
+      const id = seg.getAttribute("data-murid");
+      const onBtn = seg.querySelector("button.on");
+      if(onBtn){
+        const cls = [...onBtn.classList].find(c=>c.startsWith("sel-"));
+        dayResult[id] = cls.replace("sel-","");
+      }
+    });
+    const doSave = async ()=>{
+      const ym = tanggal.slice(0,7);
+      const key = `presensi_mapel:${state.user.id}:${kelas}:${ym}`;
+      const monthData = await getData(key, {});
+      monthData[tanggal] = dayResult;
+      const ok = await setData(key, monthData);
+      if(ok){ toast("Presensi pertemuan " + fmtDateID(tanggal) + " tersimpan."); pendingStatus={}; }
+      else toast("Gagal menyimpan. Coba lagi.");
+    };
+    if(Object.keys(dayResult).length < list.length){
+      showConfirm(
+        `Masih ada murid yang belum ditandai (${list.length - Object.keys(dayResult).length} murid). Simpan tetap dilanjutkan?`,
+        doSave,
+        {yesLabel:"Simpan", yesClass:"btn-gold"}
+      );
+    } else {
+      await doSave();
+    }
+  }
+
+  // ---- guru mapel: rekap (dihitung dari jumlah pertemuan, bukan hari efektif) ----
+  async function computeRecapMapel(guruId, kelas, ym){
+    const murid = (await getData("murid_list", [])).filter(m=>m.kelas===kelas).sort((a,b)=>a.nama.localeCompare(b.nama));
+    const monthData = await getData(`presensi_mapel:${guruId}:${kelas}:${ym}`, {});
+    const dates = Object.keys(monthData).sort();
+    const jumlahPertemuan = dates.length;
+    const summary = murid.map(m=>{
+      const c = {H:0,I:0,S:0,A:0};
+      dates.forEach(dt=>{ const s = monthData[dt][m.id]; if(s && c[s]!==undefined) c[s]++; });
+      const totalTercatat = c.H+c.I+c.S+c.A;
+      const pct = totalTercatat ? Math.round((c.H/totalTercatat)*1000)/10 : 0;
+      return {nama:m.nama, nisn:m.nisn, ...c, total: totalTercatat, pct};
+    });
+    const jumlahMurid = murid.length;
+    const denom = Math.max(jumlahMurid * jumlahPertemuan, 1);
+    const totals = summary.reduce((acc,m)=>{acc.H+=m.H;acc.I+=m.I;acc.S+=m.S;acc.A+=m.A;return acc;},{H:0,I:0,S:0,A:0});
+    const round1 = n => Math.round(((n*100)*(1/100))*1000)/1000;
+    const classPct = {
+      sakit: round1(totals.S/denom),
+      izin: round1(totals.I/denom),
+      alpha: round1(totals.A/denom),
+      ketidakhadiran: round1((totals.I+totals.S+totals.A)/denom)
+    };
+    return {murid: summary, jumlahMurid, jumlahPertemuan, totals, classPct};
+  }
+  async function rekapMapelHtml(){
+    const kelasList = state.user.kelasAjar || [];
+    if(!mapelState.rekapKelas || !kelasList.includes(mapelState.rekapKelas)) mapelState.rekapKelas = kelasList[0] || null;
+    if(!mapelState.rekapYm) mapelState.rekapYm = thisMonthStr();
+    if(!mapelState.rekapKelas) return `<div class="card"><div class="empty"><div class="big">⚠</div>Belum ada kelas yang ditugaskan untuk Anda.</div></div>`;
+    return renderRekapMapelBody(mapelState.rekapKelas, mapelState.rekapYm);
+  }
+  async function renderRekapMapelBody(kelas, ym){
+    const {murid, jumlahMurid, jumlahPertemuan, classPct} = await computeRecapMapel(state.user.id, kelas, ym);
+    const kelasList = state.user.kelasAjar || [];
+    const rows = murid.map((m,i)=>`
+      <tr>
+        <td>${i+1}</td><td>${esc(m.nama)}</td><td>${esc(m.nisn)||"-"}</td>
+        <td><span class="pill pill-h">${m.H}</span></td><td><span class="pill pill-i">${m.I}</span></td>
+        <td><span class="pill pill-s">${m.S}</span></td><td><span class="pill pill-a">${m.A}</span></td>
+        <td>${m.pct}%</td>
+      </tr>`).join("");
+    return `
+      <div class="topbar">
+        <div><h2>Rekap Bulanan Mapel — ${esc(state.user.mapel||"")}</h2><div class="desc">Dihitung dari jumlah pertemuan yang tercatat bulan ini (${jumlahPertemuan} kali pertemuan), bukan akumulasi hari efektif kalender.</div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div class="field" style="min-width:130px;"><label>Kelas</label>
+            <select onchange="PresensiApp.changeMapelRekapKelas(this.value)">
+              ${kelasList.map(k=>`<option value="${k}" ${k===kelas?"selected":""}>Kelas ${k}</option>`).join("")}
+            </select></div>
+          <div class="field" style="min-width:180px;"><label>Bulan</label>
+            <input type="month" value="${ym}" onchange="PresensiApp.changeMapelRekapMonth(this.value)"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          Tabel Rekap Kehadiran per Murid
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold btn-sm" onclick="PresensiApp.downloadRecapMapel('${kelas}','${ym}')">⬇ Excel</button>
+            <button class="btn btn-outline btn-sm" onclick="PresensiApp.printRecapMapel('${kelas}','${ym}')">🖶 Cetak / PDF</button>
+          </div>
+        </div>
+        ${murid.length? `<table><thead><tr><th>No</th><th>Nama</th><th>NISN</th><th>H</th><th>I</th><th>S</th><th>A</th><th>% Hadir</th></tr></thead>
+        <tbody>${rows}</tbody></table>` : `<div class="empty"><div class="big">📋</div>Belum ada data murid di kelas ini.</div>`}
+
+        ${murid.length? `
+        <div class="card-title" style="margin-top:22px;">Rekap Akumulasi Kelas ${kelas} (Bulanan — Mapel ${esc(state.user.mapel||"")})</div>
+        <div class="muted" style="margin-bottom:12px;">
+          Dihitung dari total hari kategori seluruh murid dibagi (jumlah murid × jumlah pertemuan) — ${jumlahMurid} murid × ${jumlahPertemuan} pertemuan = ${jumlahMurid*jumlahPertemuan} murid-pertemuan.
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="num" style="color:#2E5395;">${classPct.sakit}%</div><div class="lbl">Sakit</div></div>
+          <div class="stat-box"><div class="num" style="color:#B4720A;">${classPct.izin}%</div><div class="lbl">Izin</div></div>
+          <div class="stat-box"><div class="num" style="color:#B3261E;">${classPct.alpha}%</div><div class="lbl">Alpha</div></div>
+          <div class="stat-box"><div class="num" style="color:#1E7B45;">${classPct.ketidakhadiran}%</div><div class="lbl">Jumlah Absen</div></div>
+        </div>
+        <div class="muted" style="margin-top:-6px;">*Persentase jumlah absen (Izin+Sakit+Alpha) terhadap total murid-pertemuan, sesuai jumlah pertemuan yang tercatat.</div>
+        ` : ""}
+      </div>`;
+  }
+  async function changeMapelRekapKelas(k){
+    mapelState.rekapKelas = k;
+    document.getElementById("main").innerHTML = await renderRekapMapelBody(k, mapelState.rekapYm || thisMonthStr());
+  }
+  async function changeMapelRekapMonth(ym){
+    mapelState.rekapYm = ym;
+    document.getElementById("main").innerHTML = await renderRekapMapelBody(mapelState.rekapKelas, ym);
+  }
+  async function downloadRecapMapel(kelas, ym){
+    if(!kelas || !ym) return toast("Pilih kelas dan bulan terlebih dahulu.");
+    const {murid, jumlahMurid, jumlahPertemuan, classPct} = await computeRecapMapel(state.user.id, kelas, ym);
+    const guruList = await getData("guru_list", []);
+    const kepsek = guruList.find(g=>g.penugasan==="Kepala Sekolah") || {nama:"........................", nip:"........................"};
+    const [y,m] = ym.split("-");
+    const bulanNama = BULAN_NAMA[parseInt(m,10)-1];
+    const wsData = [
+      [`REKAP PRESENSI MATA PELAJARAN — ${SCHOOL}`],
+      [`${state.user.mapel||"Mapel"} — Kelas ${kelas} — ${bulanNama} ${y}`],
+      [],
+      ["No","Nama","NISN","Hadir","Izin","Sakit","Alpha","% Kehadiran"],
+      ...murid.map((m,i)=>[i+1, m.nama, m.nisn, m.H, m.I, m.S, m.A, m.pct+"%"]),
+      [],
+      [`Rekap Akumulasi Kelas (${jumlahMurid} murid × ${jumlahPertemuan} pertemuan)`],
+      ["% Sakit", classPct.sakit+"%"],
+      ["% Izin", classPct.izin+"%"],
+      ["% Alpha", classPct.alpha+"%"],
+      ["% Jumlah Absen (Izin+Sakit+Alpha)", classPct.ketidakhadiran+"%"],
+      [],
+      ["", "Mengetahui,", "", "", "", "Reksosari, "+ (new Date()).getDate()+" "+bulanNama+" "+y],
+      ["", "Kepala Sekolah", "", "", "", "Guru Mapel "+(state.user.mapel||"")],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["", kepsek.nama, "", "", "", state.user.nama],
+      ["", "NIP. "+(kepsek.nip||"-"), "", "", "", "NIP. "+(state.user.nip||"-")],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = [{wch:5},{wch:24},{wch:16},{wch:8},{wch:8},{wch:8},{wch:8},{wch:12}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap Mapel Kelas "+kelas);
+    XLSX.writeFile(wb, `Rekap_Mapel_Kelas${kelas}_${ym}.xlsx`);
+    toast("File Excel diunduh.");
+  }
+  async function printRecapMapel(kelas, ym){
+    if(!kelas || !ym) return toast("Pilih kelas dan bulan terlebih dahulu.");
+    const {murid, jumlahMurid, jumlahPertemuan, classPct} = await computeRecapMapel(state.user.id, kelas, ym);
+    const guruList = await getData("guru_list", []);
+    const kepsek = guruList.find(g=>g.penugasan==="Kepala Sekolah") || {nama:"........................", nip:"........................"};
+    const [y,m] = ym.split("-");
+    const bulanNama = BULAN_NAMA[parseInt(m,10)-1];
+    const todayFmt = fmtDateID(todayStr());
+    try{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(14);
+      doc.text(SCHOOL, pageW/2, 16, {align:"center"});
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10.5);
+      doc.text(`Rekap Presensi Mapel ${state.user.mapel||""} — Kelas ${kelas} — ${bulanNama} ${y}`, pageW/2, 23, {align:"center"});
+
+      doc.autoTable({
+        startY: 30,
+        margin:{left:18,right:18},
+        head: [["No","Nama","NISN","Hadir","Izin","Sakit","Alpha","% Hadir"]],
+        body: murid.map((mm,i)=>[i+1, mm.nama, mm.nisn||"-", mm.H, mm.I, mm.S, mm.A, mm.pct+"%"]),
+        styles:{ font:"helvetica", fontSize:9.5, cellPadding:3, halign:"center" },
+        columnStyles:{ 1:{halign:"left"}, 2:{halign:"left"} },
+        headStyles:{ fillColor:[31,56,100], textColor:255, halign:"center" },
+        theme:"grid"
+      });
+
+      let yPos = doc.lastAutoTable.finalY + 10;
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(9.5);
+      doc.text(`Rekap Akumulasi Kelas (${jumlahMurid} murid × ${jumlahPertemuan} pertemuan)`, 18, yPos);
+
+      doc.autoTable({
+        startY: yPos + 3,
+        margin:{left:18,right:18},
+        tableWidth: 130,
+        body: [
+          ["% Sakit", classPct.sakit+"%"],
+          ["% Izin", classPct.izin+"%"],
+          ["% Alpha", classPct.alpha+"%"],
+          ["% Jumlah Absen (Izin+Sakit+Alpha)", classPct.ketidakhadiran+"%"]
+        ],
+        styles:{ font:"helvetica", fontSize:9, cellPadding:2.5 },
+        columnStyles:{ 1:{halign:"center"} },
+        theme:"grid"
+      });
+
+      let sigY = doc.lastAutoTable.finalY + 20;
+      if(sigY > pageH - 45){ doc.addPage("a4","portrait"); sigY = 30; }
+      const leftX = pageW*0.27, rightX = pageW*0.75;
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10);
+      doc.text("Mengetahui,", leftX, sigY, {align:"center"});
+      doc.text("Kepala Sekolah", leftX, sigY+5, {align:"center"});
+      doc.text(`Reksosari, ${todayFmt}`, rightX, sigY, {align:"center"});
+      doc.text(`Guru Mapel ${state.user.mapel||""}`, rightX, sigY+5, {align:"center"});
+
+      const nameY = sigY + 30;
+      doc.text(kepsek.nama, leftX, nameY, {align:"center"});
+      doc.text(`NIP. ${kepsek.nip||"-"}`, leftX, nameY+5, {align:"center"});
+      doc.text(state.user.nama, rightX, nameY, {align:"center"});
+      doc.text(`NIP. ${state.user.nip||"-"}`, rightX, nameY+5, {align:"center"});
+
+      showPdfPreview(doc, `Rekap_Mapel_Kelas${kelas}_${ym}.pdf`);
+    }catch(err){
+      console.error(err);
+      toast("Gagal membuat PDF. Coba lagi.");
+    }
+  }
+
+  // ---- rekap ----
+  async function computeRecap(kelas, ym){
+    const murid = (await getData("murid_list", [])).filter(m=>m.kelas===kelas).sort((a,b)=>a.nama.localeCompare(b.nama));
+    const monthData = await getData(`presensi:${kelas}:${ym}`, {});
+    const dates = Object.keys(monthData).sort();
+    const summary = murid.map(m=>{
+      const c = {H:0,I:0,S:0,A:0};
+      dates.forEach(dt=>{ const s = monthData[dt][m.id]; if(s && c[s]!==undefined) c[s]++; });
+      const totalTercatat = c.H+c.I+c.S+c.A;
+      const pct = totalTercatat ? Math.round((c.H/totalTercatat)*1000)/10 : 0;
+      return {nama:m.nama, nisn:m.nisn, ...c, total: totalTercatat, pct};
+    });
+
+    const jumlahMurid = murid.length;
+    const today = new Date();
+    const isCurrentMonth = ym === thisMonthStr();
+    const upTo = isCurrentMonth ? today.getDate() : daysInMonth(ym);
+    const hariEfektif = Math.max(await effectiveDaysUpTo(ym, upTo), 1);
+    const denom = Math.max(jumlahMurid * hariEfektif, 1);
+    const totals = summary.reduce((acc,m)=>{acc.H+=m.H;acc.I+=m.I;acc.S+=m.S;acc.A+=m.A;return acc;},{H:0,I:0,S:0,A:0});
+    const round1 = n => Math.round(((n*100)*(1/100))*1000)/1000;
+    const classPct = {
+      sakit: round1(totals.S/denom),
+      izin: round1(totals.I/denom),
+      alpha: round1(totals.A/denom),
+      ketidakhadiran: round1((totals.I+totals.S+totals.A)/denom)
+    };
+
+    return {murid: summary, hariTercatat: dates.length, jumlahMurid, hariEfektif, totals, classPct};
+  }
+
+  async function rekapGuruHtml(kelas){
+    const ym = thisMonthStr();
+    return renderRekapBody(kelas, ym, true);
+  }
+  async function renderRekapBody(kelas, ym, isGuruView){
+    const {murid, hariTercatat, jumlahMurid, hariEfektif, classPct} = await computeRecap(kelas, ym);
+    const rows = murid.map((m,i)=>`
+      <tr>
+        <td>${i+1}</td><td>${esc(m.nama)}</td><td>${esc(m.nisn)||"-"}</td>
+        <td><span class="pill pill-h">${m.H}</span></td><td><span class="pill pill-i">${m.I}</span></td>
+        <td><span class="pill pill-s">${m.S}</span></td><td><span class="pill pill-a">${m.A}</span></td>
+        <td>${m.pct}%</td>
+      </tr>`).join("");
+    return `
+      <div class="topbar">
+        <div><h2>Rekap Bulanan — Kelas ${kelas}</h2><div class="desc">Hari yang tercatat pada bulan ini: ${hariTercatat} hari. Hari efektif (sesuai pengaturan kalender): ${hariEfektif} hari.</div></div>
+        <div class="field" style="min-width:180px;"><label>Bulan</label>
+          <input type="month" id="rekap-month" value="${ym}" onchange="PresensiApp.changeRekapMonth('${kelas}', this.value, ${isGuruView})"/></div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          Tabel Rekap Kehadiran per Murid
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold btn-sm" onclick="PresensiApp.downloadRecap('${kelas}','${ym}')">⬇ Excel</button>
+            <button class="btn btn-outline btn-sm" onclick="PresensiApp.printRecap('${kelas}','${ym}')">🖶 Cetak / PDF</button>
+          </div>
+        </div>
+        ${murid.length? `<table><thead><tr><th>No</th><th>Nama</th><th>NISN</th><th>H</th><th>I</th><th>S</th><th>A</th><th>% Hadir</th></tr></thead>
+        <tbody>${rows}</tbody></table>` : `<div class="empty"><div class="big">📋</div>Belum ada data murid di kelas ini.</div>`}
+
+        ${murid.length? `
+        <div class="card-title" style="margin-top:22px;">Rekap Akumulasi Kelas ${kelas} (Bulanan)</div>
+        <div class="muted" style="margin-bottom:12px;">
+          Dihitung dari total hari kategori seluruh murid dibagi (jumlah murid × hari efektif) — ${jumlahMurid} murid × ${hariEfektif} hari efektif = ${jumlahMurid*hariEfektif} hari-murid.
+        </div>
+        <div class="stat-grid">
+          <div class="stat-box"><div class="num" style="color:#2E5395;">${classPct.sakit}%</div><div class="lbl">Sakit</div></div>
+          <div class="stat-box"><div class="num" style="color:#B4720A;">${classPct.izin}%</div><div class="lbl">Izin</div></div>
+          <div class="stat-box"><div class="num" style="color:#B3261E;">${classPct.alpha}%</div><div class="lbl">Alpha</div></div>
+          <div class="stat-box"><div class="num" style="color:#1E7B45;">${classPct.ketidakhadiran}%</div><div class="lbl">Jumlah Absen</div></div>
+        </div>
+        <div class="muted" style="margin-top:-6px;">*Persentase jumlah absen (Izin+Sakit+Alpha) terhadap total hari-murid, sesuai formula kelas.</div>
+        ` : ""}
+      </div>`;
+  }
+  async function changeRekapMonth(kelas, ym, isGuruView){
+    document.getElementById("main").innerHTML = await renderRekapBody(kelas, ym, isGuruView);
+  }
+
+  async function getSignerNames(kelas){
+    const gurus = await getData("guru_list", []);
+    const wali = gurus.find(g=>g.penugasan==="Guru Kelas "+kelas);
+    const kepsek = gurus.find(g=>g.penugasan==="Kepala Sekolah");
+    return {
+      wali: wali || {nama:"........................", nip:"........................"},
+      kepsek: kepsek || {nama:"........................", nip:"........................"}
+    };
+  }
+
+  async function downloadRecap(kelas, ym){
+    if(!kelas || !ym) return toast("Pilih kelas dan bulan terlebih dahulu.");
+    const {murid, jumlahMurid, hariEfektif, classPct} = await computeRecap(kelas, ym);
+    const signer = await getSignerNames(kelas);
+    const [y,m] = ym.split("-");
+    const bulanNama = BULAN_NAMA[parseInt(m,10)-1];
+
+    const wsData = [
+      [`REKAP PRESENSI KEHADIRAN — ${SCHOOL}`],
+      [`Kelas ${kelas} — ${bulanNama} ${y}`],
+      [],
+      ["No","Nama","NISN","Hadir","Izin","Sakit","Alpha","% Kehadiran"],
+      ...murid.map((m,i)=>[i+1, m.nama, m.nisn, m.H, m.I, m.S, m.A, m.pct+"%"]),
+      [],
+      [`Rekap Akumulasi Kelas (${jumlahMurid} murid × ${hariEfektif} hari efektif)`],
+      ["% Sakit", classPct.sakit+"%"],
+      ["% Izin", classPct.izin+"%"],
+      ["% Alpha", classPct.alpha+"%"],
+      ["% Jumlah Absen (Izin+Sakit+Alpha)", classPct.ketidakhadiran+"%"],
+      [],
+      ["", "Mengetahui,", "", "", "", "Reksosari, "+ (new Date()).getDate()+" "+bulanNama+" "+y],
+      ["", "Kepala Sekolah", "", "", "", "Guru Kelas "+kelas],
+      ["", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["", signer.kepsek.nama, "", "", "", signer.wali.nama],
+      ["", "NIP. "+(signer.kepsek.nip||"-"), "", "", "", "NIP. "+(signer.wali.nip||"-")],
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws["!cols"] = [{wch:5},{wch:24},{wch:16},{wch:8},{wch:8},{wch:8},{wch:8},{wch:12}];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Rekap Kelas "+kelas);
+    XLSX.writeFile(wb, `Rekap_Presensi_Kelas${kelas}_${ym}.xlsx`);
+    toast("File Excel diunduh.");
+  }
+
+  function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 5000);
+  }
+
+  async function showPdfPreview(doc, filename){
+    const pdfBytes = doc.output("arraybuffer");
+    const blob = new Blob([pdfBytes], {type:"application/pdf"});
+
+    const overlay = document.createElement("div");
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(10,20,40,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;";
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:12px;width:100%;max-width:960px;height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,.35);overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);flex-shrink:0;">
+          <div style="font-weight:700;color:var(--navy-2);font-size:14px;">Pratinjau PDF — ${esc(filename)}</div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-gold btn-sm" id="pdf-download-btn">⬇ Unduh PDF</button>
+            <button class="btn btn-outline btn-sm" id="pdf-close-btn">Tutup</button>
+          </div>
+        </div>
+        <div id="pdf-canvas-wrap" style="flex:1;overflow:auto;background:#525659;padding:18px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+          <div style="color:#fff;font-size:13px;">Memuat pratinjau...</div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector("#pdf-close-btn").onclick = ()=> overlay.remove();
+    overlay.querySelector("#pdf-download-btn").onclick = ()=> downloadBlob(blob, filename);
+
+    try{
+      const pdfjsLib = window["pdfjs-dist/build/pdf"];
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const pdf = await pdfjsLib.getDocument({data: pdfBytes.slice(0)}).promise;
+      const wrap = overlay.querySelector("#pdf-canvas-wrap");
+      wrap.innerHTML = "";
+      for(let i=1;i<=pdf.numPages;i++){
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({scale:1.4});
+        const canvas = document.createElement("canvas");
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.cssText = "background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.35);max-width:100%;height:auto;";
+        await page.render({canvasContext: canvas.getContext("2d"), viewport}).promise;
+        wrap.appendChild(canvas);
+      }
+    }catch(err){
+      console.error(err);
+      overlay.querySelector("#pdf-canvas-wrap").innerHTML =
+        `<div style="color:#fff;font-size:13px;text-align:center;max-width:360px;">Pratinjau tidak dapat ditampilkan, tetapi file PDF tetap bisa diunduh lewat tombol di atas.</div>`;
+    }
+  }
+
+  async function printRecap(kelas, ym){
+    if(!kelas || !ym) return toast("Pilih kelas dan bulan terlebih dahulu.");
+    const {murid, jumlahMurid, hariEfektif, classPct} = await computeRecap(kelas, ym);
+    const signer = await getSignerNames(kelas);
+    const [y,m] = ym.split("-");
+    const bulanNama = BULAN_NAMA[parseInt(m,10)-1];
+    const todayFmt = fmtDateID(todayStr());
+
+    try{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({unit:"mm", format:"a4", orientation:"portrait"});
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(14);
+      doc.text(SCHOOL, pageW/2, 16, {align:"center"});
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10.5);
+      doc.text(`Rekap Presensi Kehadiran — Kelas ${kelas} — ${bulanNama} ${y}`, pageW/2, 23, {align:"center"});
+
+      doc.autoTable({
+        startY: 30,
+        margin:{left:18,right:18},
+        head: [["No","Nama","NISN","Hadir","Izin","Sakit","Alpha","% Hadir"]],
+        body: murid.map((mm,i)=>[i+1, mm.nama, mm.nisn||"-", mm.H, mm.I, mm.S, mm.A, mm.pct+"%"]),
+        styles:{ font:"helvetica", fontSize:9.5, cellPadding:3, halign:"center" },
+        columnStyles:{ 1:{halign:"left"}, 2:{halign:"left"} },
+        headStyles:{ fillColor:[31,56,100], textColor:255, halign:"center" },
+        theme:"grid"
+      });
+
+      let yPos = doc.lastAutoTable.finalY + 10;
+      doc.setFont("helvetica","bold");
+      doc.setFontSize(9.5);
+      doc.text(`Rekap Akumulasi Kelas (${jumlahMurid} murid × ${hariEfektif} hari efektif)`, 18, yPos);
+
+      doc.autoTable({
+        startY: yPos + 3,
+        margin:{left:18,right:18},
+        tableWidth: 130,
+        body: [
+          ["% Sakit", classPct.sakit+"%"],
+          ["% Izin", classPct.izin+"%"],
+          ["% Alpha", classPct.alpha+"%"],
+          ["% Jumlah Absen (Izin+Sakit+Alpha)", classPct.ketidakhadiran+"%"]
+        ],
+        styles:{ font:"helvetica", fontSize:9, cellPadding:2.5 },
+        columnStyles:{ 1:{halign:"center"} },
+        theme:"grid"
+      });
+
+      let sigY = doc.lastAutoTable.finalY + 20;
+      if(sigY > pageH - 45){ doc.addPage("a4","portrait"); sigY = 30; }
+      const leftX = pageW*0.27, rightX = pageW*0.75;
+      doc.setFont("helvetica","normal");
+      doc.setFontSize(10);
+      doc.text("Mengetahui,", leftX, sigY, {align:"center"});
+      doc.text("Kepala Sekolah", leftX, sigY+5, {align:"center"});
+      doc.text(`Reksosari, ${todayFmt}`, rightX, sigY, {align:"center"});
+      doc.text(`Guru Kelas ${kelas}`, rightX, sigY+5, {align:"center"});
+
+      const nameY = sigY + 30;
+      doc.text(signer.kepsek.nama, leftX, nameY, {align:"center"});
+      doc.text(`NIP. ${signer.kepsek.nip||"-"}`, leftX, nameY+5, {align:"center"});
+      doc.text(signer.wali.nama, rightX, nameY, {align:"center"});
+      doc.text(`NIP. ${signer.wali.nip||"-"}`, rightX, nameY+5, {align:"center"});
+
+      showPdfPreview(doc, `Rekap_Presensi_Kelas${kelas}_${ym}.pdf`);
+    }catch(err){
+      console.error(err);
+      toast("Gagal membuat PDF. Coba lagi.");
+    }
+  }
+
+  function go(key){
+    if(state.user.role==="admin") renderAdmin(key);
+    else if(state.user.role==="kepsek") renderKepsek(key);
+    else renderGuru(key);
+  }
+
+  window.PresensiApp = {
+    login, logout, go,
+    saveGuru, editGuru, cancelGuruEdit, deleteGuru, onGuruPenugasanChange,
+    saveMurid, editMurid, cancelMuridEdit, deleteMurid,
+    handleFileImport, confirmFileImport, cancelFileImport,
+    downloadTemplateMurid,
+    toggleSelectAllMurid, onMuridRowCheck, deleteSelectedMurid,
+    changeMonitorMonth, saveAdminAccount,
+    setStatus, markAllHadir, changeTanggal, saveAttendance,
+    changeRekapMonth, downloadRecap, printRecap,
+    changeUsiaMonth,
+    changeKalenderMonth, toggleHariEfektif, resetKalenderDefault, saveKalender,
+    changeMapelKelas, changeMapelTanggal, saveAttendanceMapel,
+    changeMapelRekapKelas, changeMapelRekapMonth, downloadRecapMapel, printRecapMapel,
+    changeSemesterFilter, downloadSemesterPdf
+  };
+
+  renderLogin();
+})();
+</script>
+
+</body>
+</html>
